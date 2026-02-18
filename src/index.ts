@@ -35,6 +35,34 @@ const app = new OpenAPIHono();
 
 app.onError(handleError);
 
+// Request logger
+app.use("*", async (c, next) => {
+    const start = Date.now();
+    await next();
+    const ms = Date.now() - start;
+    console.log(`${c.req.method} ${c.req.path} → ${c.res.status} (${ms}ms)`);
+});
+
+// Root — API info + navigation
+app.get("/", (c) => {
+    const base = process.env.APP_URL || `http://localhost:${PORT}`;
+    return c.json({
+        name: "Easypanel API Gateway",
+        version: "1.0.0",
+        description: "REST API gateway for Easypanel — translates REST to internal tRPC",
+        endpoints: {
+            docs: `${base}/docs`,
+            openapi: `${base}/openapi.json`,
+            health: `${base}/health`,
+            auth_status: `${base}/auth/status`,
+            api: `${base}/api/v1`,
+        },
+        authentication: process.env.API_SECRET
+            ? "API_SECRET required — pass as Authorization: Bearer <secret>"
+            : "⚠ No API_SECRET set (dev mode — no auth required)",
+    });
+});
+
 // Health check (public — no auth)
 app.get("/health", (c) =>
     c.json({ status: "ok", version: "1.0.0", timestamp: new Date().toISOString() })
