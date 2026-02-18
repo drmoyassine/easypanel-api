@@ -44,10 +44,15 @@ export async function getEasypanelToken(): Promise<string> {
 
     let token: string | null = null;
 
-    // Method 1: Token in the response body (Easypanel returns { ezToken: "..." })
-    if (data && typeof data === "object" && "ezToken" in data && data.ezToken) {
-        token = data.ezToken;
-        console.log("[auth] ✓ Got token from response body");
+    // Method 1: Token in the response body
+    // Easypanel may return { token: "..." } or { ezToken: "..." }
+    if (data && typeof data === "object") {
+        const d = data as Record<string, unknown>;
+        const bodyToken = d.token || d.ezToken;
+        if (typeof bodyToken === "string" && bodyToken) {
+            token = bodyToken;
+            console.log("[auth] ✓ Got token from response body");
+        }
     }
 
     // Method 2: Token in Set-Cookie header
