@@ -5,6 +5,18 @@ import { authMiddleware } from "./middleware/auth.js";
 import { handleError } from "./lib/errors.js";
 import { getEasypanelToken } from "./lib/token-manager.js";
 
+// Ensure crashes always show in Docker logs
+process.on("uncaughtException", (err) => {
+    console.error("[FATAL] Uncaught exception:", err);
+    process.exit(1);
+});
+process.on("unhandledRejection", (err) => {
+    console.error("[FATAL] Unhandled rejection:", err);
+    process.exit(1);
+});
+
+console.log("[startup] easypanel-api loading...");
+
 // Route imports
 import auth from "./routes/auth.js";
 import projects from "./routes/projects.js";
@@ -71,6 +83,8 @@ app.route("/api/v1/monitor", monitor);
 
 // ── OpenAPI specification ────────────────────────────────────
 
+const PORT = parseInt(process.env.PORT || "3100", 10);
+
 app.doc("/openapi.json", {
     openapi: "3.1.0",
     info: {
@@ -83,7 +97,10 @@ app.doc("/openapi.json", {
         license: { name: "MIT" },
     },
     servers: [
-        { url: "http://localhost:3100", description: "Local development" },
+        {
+            url: process.env.APP_URL || `http://localhost:${PORT}`,
+            description: process.env.APP_URL ? "Production" : "Local development",
+        },
     ],
     security: [{ Bearer: [] }],
 });
@@ -102,9 +119,14 @@ app.get("/docs", swaggerUI({ url: "/openapi.json" }));
 
 // ── Start server ─────────────────────────────────────────────
 
-const PORT = parseInt(process.env.PORT || "3100", 10);
-
 async function start() {
+    console.log(`[startup] PORT=${PORT}`);
+    console.log(`[startup] APP_URL=${process.env.APP_URL || "not set (using localhost)"}`);
+    console.log(`[startup] EASYPANEL_URL=${process.env.EASYPANEL_URL || "http://localhost:3000"}`);
+    console.log(`[startup] EASYPANEL_EMAIL=${process.env.EASYPANEL_EMAIL ? "set" : "NOT SET"}`);
+    console.log(`[startup] EASYPANEL_PASSWORD=${process.env.EASYPANEL_PASSWORD ? "set" : "NOT SET"}`);
+    console.log(`[startup] API_SECRET=${process.env.API_SECRET ? "set" : "not set (dev mode)"}`);
+
     // Pre-authenticate with Easypanel on startup
     try {
         await getEasypanelToken();
@@ -113,19 +135,13 @@ async function start() {
         console.error("[startup]   The gateway will retry on the first API call.");
     }
 
-    console.log(`
-╔══════════════════════════════════════════════════╗
-║      Easypanel API Gateway v1.0.0                ║
-╠══════════════════════════════════════════════════╣
-║  REST API  → http://localhost:${PORT}/api/v1        ║
-║  Docs      → http://localhost:${PORT}/docs           ║
-║  OpenAPI   → http://localhost:${PORT}/openapi.json   ║
-║  Health    → http://localhost:${PORT}/health          ║
-║  Auth      → ${process.env.API_SECRET ? "API_SECRET required" : "⚠ No API_SECRET (dev mode)"}${" ".repeat(Math.max(0, 25 - (process.env.API_SECRET ? 19 : 26)))}║
-╚══════════════════════════════════════════════════╝
-`);
-
     serve({ fetch: app.fetch, port: PORT });
+
+    console.log(`[startup] ✓ Listening on http://localhost:${PORT}`);
+    console.log(`[startup] ✓ Docs at http://localhost:${PORT}/docs`);
 }
 
-start();
+start().catch((err) => {
+    console.error("[FATAL] Startup failed:", err);
+    process.exit(1);
+});

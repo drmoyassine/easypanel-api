@@ -37,32 +37,48 @@ export async function getEasypanelToken(): Promise<string> {
 
     console.log("[auth] Logging into Easypanel...");
 
-    const { headers } = await callTrpcRaw("auth.login", { email, password });
+    const { data, headers } = await callTrpcRaw<{ ezToken?: string }>(
+        "auth.login",
+        { email, password }
+    );
 
-    // Extract ez-token from Set-Cookie header
-    const setCookie = headers.get("set-cookie") || "";
     let token: string | null = null;
 
-    const match = setCookie.match(/ez-token=([^;]+)/);
-    if (match) {
-        token = match[1];
+    // Method 1: Token in the response body (Easypanel returns { ezToken: "..." })
+    if (data && typeof data === "object" && "ezToken" in data && data.ezToken) {
+        token = data.ezToken;
+        console.log("[auth] ✓ Got token from response body");
     }
 
-    // Try getSetCookie() for multi-header environments
+    // Method 2: Token in Set-Cookie header
+    if (!token) {
+        const setCookie = headers.get("set-cookie") || "";
+        const match = setCookie.match(/ez-token=([^;]+)/);
+        if (match) {
+            token = match[1];
+            console.log("[auth] ✓ Got token from Set-Cookie header");
+        }
+    }
+
+    // Method 3: Try getSetCookie() for multi-header environments
     if (!token) {
         const allCookies = headers.getSetCookie?.() || [];
         for (const cookie of allCookies) {
             const m = cookie.match(/ez-token=([^;]+)/);
             if (m) {
                 token = m[1];
+                console.log("[auth] ✓ Got token from getSetCookie()");
                 break;
             }
         }
     }
 
     if (!token) {
+        // Log what we DID get for debugging
+        console.error("[auth] Response data:", JSON.stringify(data));
+        console.error("[auth] Set-Cookie:", headers.get("set-cookie"));
         throw new Error(
-            "Login succeeded but no ez-token cookie was returned. Check Easypanel version."
+            "Login succeeded but could not extract ez-token from response"
         );
     }
 
