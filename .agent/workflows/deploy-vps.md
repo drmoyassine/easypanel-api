@@ -26,92 +26,36 @@ http://<YOUR_VPS_IP>:3000
 ```
 
 Complete the setup wizard — create your admin **email** and **password**.
-Keep these credentials, you'll use them to authenticate with the API gateway.
 
 ---
 
-## Step 2 — Install Node.js
+## Step 2 — Deploy the API Gateway inside Easypanel
 
-```bash
-# Install Node.js 20 LTS via NodeSource
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+1. In Easypanel UI, create a new **Project** (e.g. `infra`)
+2. Inside the project, click **+ New Service → App**
+3. Name it `api-gateway`
+4. Under **Source**, choose **GitHub** and select `drmoyassine/easypanel-api`
+5. Under **Build**, set type to **Dockerfile**
+6. Under **Environment**, add:
+   ```
+   EASYPANEL_URL=http://easypanel:3000
+   PORT=3100
+   ```
+7. Under **Domains**, add your domain (e.g. `api.yourdomain.com`)
+   - Or use the generated Easypanel subdomain for testing
+8. Click **Deploy**
 
-# Verify
-node -v   # v20.x.x
-npm -v    # 10.x.x
-```
-
----
-
-## Step 3 — Upload easypanel-api
-
-**Option A** — scp from your local machine:
-```bash
-# From your LOCAL machine:
-scp -r ./easypanel-api root@<YOUR_VPS_IP>:/opt/easypanel-api
-```
-
-**Option B** — git clone (if you've pushed to a repo):
-```bash
-cd /opt
-sudo git clone <YOUR_REPO_URL> easypanel-api
-```
-
-Then on the VPS:
-```bash
-cd /opt/easypanel-api
-npm install
-npx tsc     # compile src/ → dist/
-```
+That's it! Easypanel builds the Docker image, runs it, and configures SSL automatically.
 
 ---
 
-## Step 4 — Create a systemd service
+## Step 3 — Authenticate
 
 ```bash
-sudo tee /etc/systemd/system/easypanel-api.service > /dev/null << 'EOF'
-[Unit]
-Description=Easypanel API Gateway
-After=network.target docker.service
-
-[Service]
-Type=simple
-WorkingDirectory=/opt/easypanel-api
-ExecStart=/usr/bin/node dist/index.js
-Restart=always
-RestartSec=5
-
-# Environment
-Environment=PORT=3100
-Environment=EASYPANEL_URL=http://localhost:3000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable easypanel-api
-sudo systemctl start easypanel-api
-
-# Verify it's running
-sudo systemctl status easypanel-api
-sudo journalctl -u easypanel-api -f
-```
-
----
-
-## Step 5 — Authenticate
-
-Easypanel does NOT have an API tokens page. Instead, the gateway provides
-a login endpoint that extracts the session token for you.
-
-### 5a. Get your token
-
-```bash
-curl -X POST http://localhost:3100/auth/login \
+# Login with your Easypanel admin credentials
+curl -X POST https://api.yourdomain.com/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "your-admin@email.com", "password": "your-password"}'
+  -d '{"email": "admin@example.com", "password": "your-password"}'
 ```
 
 Response:
@@ -122,52 +66,30 @@ Response:
 }
 ```
 
-Save that token — use it as `Authorization: Bearer <token>` for all API calls.
-
-### 5b. (Optional) Generate a long-lived API token
-
-```bash
-curl -X POST http://localhost:3100/auth/api-token \
-  -H "Authorization: Bearer <token-from-step-5a>"
-```
-
-This calls `users.generateApiToken` internally. The returned token won't expire
-like the session token does.
+Use this token as `Authorization: Bearer <token>` for all API calls.
 
 ---
 
-## Step 6 — Test it
+## Step 4 — Test
 
 ```bash
-# Health check (no auth)
-curl http://localhost:3100/health
+TOKEN="eyJhb..."
+
+# Health check
+curl https://api.yourdomain.com/health
 
 # List projects
-curl -H "Authorization: Bearer <YOUR_TOKEN>" \
-     http://localhost:3100/api/v1/projects
+curl -H "Authorization: Bearer $TOKEN" \
+     https://api.yourdomain.com/api/v1/projects
 
 # Create a project
-curl -X POST http://localhost:3100/api/v1/projects \
-  -H "Authorization: Bearer <YOUR_TOKEN>" \
+curl -X POST https://api.yourdomain.com/api/v1/projects \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "test-project"}'
 ```
 
-Swagger docs: `http://<YOUR_VPS_IP>:3100/docs`
-
----
-
-## Step 7 — Security (production)
-
-The gateway has no rate limiting or IP restrictions by default. Lock down port 3100:
-
-```bash
-# Only allow your backend server(s) to reach the API
-sudo ufw allow from <BACKEND_IP> to any port 3100
-
-# Or block public access entirely (if calling from localhost only)
-sudo ufw deny 3100
-```
+Swagger docs: `https://api.yourdomain.com/docs`
 
 ---
 
@@ -177,17 +99,22 @@ sudo ufw deny 3100
 ┌─────────────────────────────────────────────────┐
 │  Ubuntu 24.04 VPS                                │
 │                                                   │
-│  ┌──────────────┐     ┌─────────────────────┐    │
-│  │ Easypanel    │     │ easypanel-api        │    │
-│  │ (Docker)     │◄────│ (Node.js, port 3100) │    │
-│  │ port 3000    │     │                      │    │
-│  │ tRPC internal│     │ REST → tRPC gateway  │    │
-│  └──────────────┘     └─────────────────────┘    │
-│        │                       ▲                  │
-│        ▼                       │                  │
-│  ┌──────────────┐    Your backend (frontbase.dev) │
-│  │ Traefik      │    calls POST /auth/login once  │
-│  │ port 443/80  │    then uses Bearer token       │
-│  └──────────────┘                                 │
+│  ┌─────────────────────────────────────────┐     │
+│  │          Easypanel (Docker)              │     │
+│  │                                          │     │
+│  │  ┌──────────────┐  ┌────────────────┐   │     │
+│  │  │ easypanel    │  │ api-gateway    │   │     │
+│  │  │ (tRPC :3000) │◄─│ (REST :3100)   │   │     │
+│  │  └──────────────┘  └────────────────┘   │     │
+│  │                                          │     │
+│  │  ┌──────────────┐                       │     │
+│  │  │ Traefik      │  ← SSL + routing      │     │
+│  │  │ :443 / :80   │                       │     │
+│  │  └──────────────┘                       │     │
+│  └─────────────────────────────────────────┘     │
+│                         ▲                         │
+│                         │                         │
+│              Your backend (frontbase.dev)          │
+│              calls https://api.yourdomain.com      │
 └─────────────────────────────────────────────────┘
 ```

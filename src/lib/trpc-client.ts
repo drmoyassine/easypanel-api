@@ -3,7 +3,12 @@
  *
  * Easypanel exposes its internal API as tRPC procedures on port 3000.
  * We call them directly via POST with a JSON body — no SDK needed.
+ *
+ * The token is auto-managed by token-manager.ts. Route handlers
+ * simply call `callTrpc("procedure", input)` without thinking about auth.
  */
+
+import { getEasypanelToken, invalidateToken } from "./token-manager.js";
 
 const EASYPANEL_BASE_URL =
     process.env.EASYPANEL_URL || "http://localhost:3000";
@@ -28,14 +33,13 @@ export interface TrpcError {
     };
 }
 
-/** Result of callTrpcRaw — includes both data and response headers. */
 export interface TrpcRawResult<T = unknown> {
     data: T;
     headers: Headers;
 }
 
 /**
- * Internal fetch wrapper shared by both callTrpc and callTrpcRaw.
+ * Internal fetch wrapper.
  */
 async function doTrpcFetch(
     procedure: string,
@@ -71,28 +75,37 @@ async function doTrpcFetch(
 }
 
 /**
- * Call an Easypanel tRPC procedure and return parsed data.
+ * Call an Easypanel tRPC procedure.
+ * Token is fetched automatically from token-manager.
+ * On 401, the token is refreshed and the call retried once.
  *
  * @param procedure - Dot-separated procedure name, e.g. "projects.listProjects"
  * @param input     - JSON-serializable input payload
- * @param token     - ez-token (forwarded as cookie)
  */
 export async function callTrpc<T = unknown>(
     procedure: string,
-    input: unknown = {},
-    token: string
+    input: unknown = {}
 ): Promise<T> {
-    const { body } = await doTrpcFetch(procedure, input, token);
-    return (body as unknown as TrpcResult<T>).result.data.json;
+    const token = await getEasypanelToken();
+
+    try {
+        const { body } = await doTrpcFetch(procedure, input, token);
+        return (body as unknown as TrpcResult<T>).result.data.json;
+    } catch (err) {
+        // If 401 (expired session), refresh token and retry once
+        if (err instanceof TrpcCallError && err.status === 401) {
+            invalidateToken();
+            const freshToken = await getEasypanelToken();
+            const { body } = await doTrpcFetch(procedure, input, freshToken);
+            return (body as unknown as TrpcResult<T>).result.data.json;
+        }
+        throw err;
+    }
 }
 
 /**
- * Call a tRPC procedure and return BOTH data + response headers.
- * Used for auth.login where we need to capture the Set-Cookie header.
- *
- * @param procedure - Procedure name
- * @param input     - Input payload
- * @param token     - Optional ez-token (omit for unauthenticated calls like login)
+ * Call a tRPC procedure WITHOUT auto-token (used by token-manager for login).
+ * This variant DOES NOT use token-manager to avoid circular dependencies.
  */
 export async function callTrpcRaw<T = unknown>(
     procedure: string,

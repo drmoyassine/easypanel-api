@@ -12,13 +12,11 @@ import {
 } from "../schemas/resources.js";
 import { ErrorSchema, SuccessSchema, ServiceParamsSchema, ProjectParamsSchema } from "../schemas/common.js";
 
-type Env = { Variables: { token: string } };
-
 // ════════════════════════════════════════════════════════════════
 // TEMPLATES
 // ════════════════════════════════════════════════════════════════
 
-export const templates = new OpenAPIHono<Env>();
+export const templates = new OpenAPIHono();
 
 // POST / — templates.createFromSchema
 templates.openapi(
@@ -38,7 +36,7 @@ templates.openapi(
     }),
     async (c) => {
         const body = c.req.valid("json");
-        const data = await callTrpc("templates.createFromSchema", body, c.get("token"));
+        const data = await callTrpc("templates.createFromSchema", body);
         return c.json(data ?? { ok: true } as any, 201);
     }
 );
@@ -47,7 +45,7 @@ templates.openapi(
 // MONITOR
 // ════════════════════════════════════════════════════════════════
 
-export const monitor = new OpenAPIHono<Env>();
+export const monitor = new OpenAPIHono();
 
 // GET /system — monitor.getSystemStats
 monitor.openapi(
@@ -62,7 +60,7 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("monitor.getSystemStats", {}, c.get("token"));
+        const data = await callTrpc("monitor.getSystemStats", {});
         return c.json(data as any, 200);
     }
 );
@@ -80,7 +78,7 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("monitor.getStorageStats", {}, c.get("token"));
+        const data = await callTrpc("monitor.getStorageStats", {});
         return c.json(data as any, 200);
     }
 );
@@ -98,7 +96,7 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("monitor.getMonitorTableData", {}, c.get("token"));
+        const data = await callTrpc("monitor.getMonitorTableData", {});
         return c.json(data as any, 200);
     }
 );

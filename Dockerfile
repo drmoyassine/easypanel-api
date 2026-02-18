@@ -23,9 +23,12 @@ RUN npm install --omit=dev --frozen-lockfile 2>/dev/null || npm install --omit=d
 
 COPY --from=builder /app/dist ./dist
 
-# Default config
+# Default config — override at deploy time
 ENV PORT=3100
 ENV EASYPANEL_URL=http://easypanel:3000
+ENV EASYPANEL_EMAIL=
+ENV EASYPANEL_PASSWORD=
+ENV API_SECRET=
 ENV NODE_ENV=production
 
 EXPOSE 3100

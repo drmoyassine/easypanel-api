@@ -13,8 +13,6 @@ import {
 } from "../schemas/resources.js";
 import { ErrorSchema, SuccessSchema, ServiceParamsSchema } from "../schemas/common.js";
 
-type Env = { Variables: { token: string } };
-
 function svc(c: any) {
     const { projectName, serviceName } = c.req.valid("param");
     return { projectName, serviceName };
@@ -24,7 +22,7 @@ function svc(c: any) {
 // DOMAINS
 // ════════════════════════════════════════════════════════════════
 
-export const domains = new OpenAPIHono<Env>();
+export const domains = new OpenAPIHono();
 
 // GET / — domains.listDomains
 domains.openapi(
@@ -38,7 +36,7 @@ domains.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("domains.listDomains", svc(c), c.get("token"));
+        const data = await callTrpc("domains.listDomains", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -60,7 +58,7 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.createDomain", { ...p, ...body }, c.get("token"));
+        await callTrpc("domains.createDomain", { ...p, ...body });
         return c.json({ ok: true }, 201);
     }
 );
@@ -82,7 +80,7 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.updateDomain", { ...p, ...body }, c.get("token"));
+        await callTrpc("domains.updateDomain", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -104,7 +102,7 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.deleteDomain", { ...p, ...body }, c.get("token"));
+        await callTrpc("domains.deleteDomain", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -126,7 +124,7 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.setPrimaryDomain", { ...p, ...body }, c.get("token"));
+        await callTrpc("domains.setPrimaryDomain", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -135,7 +133,7 @@ domains.openapi(
 // PORTS
 // ════════════════════════════════════════════════════════════════
 
-export const ports = new OpenAPIHono<Env>();
+export const ports = new OpenAPIHono();
 
 // GET / — ports.listPorts
 ports.openapi(
@@ -149,7 +147,7 @@ ports.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("ports.listPorts", svc(c), c.get("token"));
+        const data = await callTrpc("ports.listPorts", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -171,7 +169,7 @@ ports.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("ports.createPort", { ...p, ...body }, c.get("token"));
+        await callTrpc("ports.createPort", { ...p, ...body });
         return c.json({ ok: true }, 201);
     }
 );
@@ -193,7 +191,7 @@ ports.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("ports.updatePort", { ...p, ...body }, c.get("token"));
+        await callTrpc("ports.updatePort", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -215,7 +213,7 @@ ports.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("ports.deletePort", { ...p, ...body }, c.get("token"));
+        await callTrpc("ports.deletePort", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -224,7 +222,7 @@ ports.openapi(
 // MOUNTS
 // ════════════════════════════════════════════════════════════════
 
-export const mounts = new OpenAPIHono<Env>();
+export const mounts = new OpenAPIHono();
 
 // GET / — mounts.listMounts
 mounts.openapi(
@@ -238,7 +236,7 @@ mounts.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("mounts.listMounts", svc(c), c.get("token"));
+        const data = await callTrpc("mounts.listMounts", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -260,7 +258,7 @@ mounts.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("mounts.createMount", { ...p, ...body }, c.get("token"));
+        await callTrpc("mounts.createMount", { ...p, ...body });
         return c.json({ ok: true }, 201);
     }
 );
@@ -282,7 +280,7 @@ mounts.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("mounts.updateMount", { ...p, ...body }, c.get("token"));
+        await callTrpc("mounts.updateMount", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -304,7 +302,7 @@ mounts.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("mounts.deleteMount", { ...p, ...body }, c.get("token"));
+        await callTrpc("mounts.deleteMount", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );

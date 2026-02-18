@@ -9,9 +9,7 @@ import {
 } from "../schemas/projects.js";
 import { ErrorSchema, SuccessSchema, ProjectParamsSchema } from "../schemas/common.js";
 
-type Env = { Variables: { token: string } };
-
-const projects = new OpenAPIHono<Env>();
+const projects = new OpenAPIHono();
 
 // ── GET / ── projects.listProjects ─────────────────────────────
 
@@ -28,7 +26,7 @@ projects.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("projects.listProjects", {}, c.get("token"));
+        const data = await callTrpc("projects.listProjects", {});
         return c.json(data as any, 200);
     }
 );
@@ -50,7 +48,7 @@ projects.openapi(
     }),
     async (c) => {
         const body = c.req.valid("json");
-        const data = await callTrpc("projects.createProject", body, c.get("token"));
+        const data = await callTrpc("projects.createProject", body);
         return c.json(data as any, 201);
     }
 );
@@ -72,7 +70,7 @@ projects.openapi(
     }),
     async (c) => {
         const { projectName } = c.req.valid("param");
-        const data = await callTrpc("projects.inspectProject", { projectName }, c.get("token"));
+        const data = await callTrpc("projects.inspectProject", { projectName });
         return c.json(data as any, 200);
     }
 );
@@ -94,7 +92,7 @@ projects.openapi(
     }),
     async (c) => {
         const { projectName } = c.req.valid("param");
-        await callTrpc("projects.destroyProject", { projectName }, c.get("token"));
+        await callTrpc("projects.destroyProject", { projectName });
         return c.json({ ok: true }, 200);
     }
 );
@@ -119,7 +117,7 @@ projects.openapi(
     async (c) => {
         const { projectName } = c.req.valid("param");
         const body = c.req.valid("json");
-        await callTrpc("projects.updateProjectEnv", { projectName, ...body }, c.get("token"));
+        await callTrpc("projects.updateProjectEnv", { projectName, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -140,7 +138,7 @@ projects.openapi(
     }),
     async (c) => {
         const { projectName } = c.req.valid("param");
-        const data = await callTrpc("projects.getDockerContainers", { projectName }, c.get("token"));
+        const data = await callTrpc("projects.getDockerContainers", { projectName });
         return c.json(data as any, 200);
     }
 );

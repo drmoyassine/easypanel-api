@@ -17,9 +17,7 @@ import {
 } from "../schemas/services.js";
 import { ErrorSchema, SuccessSchema, ServiceParamsSchema } from "../schemas/common.js";
 
-type Env = { Variables: { token: string } };
-
-const app = new OpenAPIHono<Env>();
+const app = new OpenAPIHono();
 
 // Helper: extract projectName/serviceName from path params
 function svc(c: any) {
@@ -44,7 +42,7 @@ app.openapi(
     }),
     async (c) => {
         const body = c.req.valid("json");
-        const data = await callTrpc("services.app.createService", body, c.get("token"));
+        const data = await callTrpc("services.app.createService", body);
         return c.json(data as any, 201);
     }
 );
@@ -65,7 +63,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("services.app.inspectService", svc(c), c.get("token"));
+        const data = await callTrpc("services.app.inspectService", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -85,7 +83,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.app.destroyService", svc(c), c.get("token"));
+        await callTrpc("services.app.destroyService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -105,7 +103,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.app.deployService", svc(c), c.get("token"));
+        await callTrpc("services.app.deployService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -125,7 +123,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.app.startService", svc(c), c.get("token"));
+        await callTrpc("services.app.startService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -145,7 +143,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.app.stopService", svc(c), c.get("token"));
+        await callTrpc("services.app.stopService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -165,7 +163,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.app.restartService", svc(c), c.get("token"));
+        await callTrpc("services.app.restartService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -190,7 +188,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateSourceGithub", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateSourceGithub", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -215,7 +213,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateSourceGit", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateSourceGit", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -240,7 +238,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateSourceImage", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateSourceImage", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -265,7 +263,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateSourceDockerfile", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateSourceDockerfile", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -290,7 +288,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateBuild", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateBuild", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -315,7 +313,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateDeploy", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateDeploy", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -340,7 +338,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateEnv", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateEnv", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -365,7 +363,7 @@ app.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.app.updateResources", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.app.updateResources", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );

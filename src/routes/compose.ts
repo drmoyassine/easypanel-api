@@ -9,9 +9,7 @@ import {
 } from "../schemas/services.js";
 import { ErrorSchema, SuccessSchema, ServiceParamsSchema } from "../schemas/common.js";
 
-type Env = { Variables: { token: string } };
-
-const compose = new OpenAPIHono<Env>();
+const compose = new OpenAPIHono();
 
 function svc(c: any) {
     const { projectName, serviceName } = c.req.valid("param");
@@ -34,7 +32,7 @@ compose.openapi(
     }),
     async (c) => {
         const body = c.req.valid("json");
-        const data = await callTrpc("services.compose.createService", body, c.get("token"));
+        const data = await callTrpc("services.compose.createService", body);
         return c.json(data as any, 201);
     }
 );
@@ -53,7 +51,7 @@ compose.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("services.compose.inspectService", svc(c), c.get("token"));
+        const data = await callTrpc("services.compose.inspectService", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -72,7 +70,7 @@ compose.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.compose.destroyService", svc(c), c.get("token"));
+        await callTrpc("services.compose.destroyService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -91,7 +89,7 @@ compose.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.compose.deployService", svc(c), c.get("token"));
+        await callTrpc("services.compose.deployService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -110,7 +108,7 @@ compose.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.compose.startService", svc(c), c.get("token"));
+        await callTrpc("services.compose.startService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -129,7 +127,7 @@ compose.openapi(
         },
     }),
     async (c) => {
-        await callTrpc("services.compose.stopService", svc(c), c.get("token"));
+        await callTrpc("services.compose.stopService", svc(c));
         return c.json({ ok: true }, 200);
     }
 );
@@ -153,7 +151,7 @@ compose.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.compose.updateSourceInline", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.compose.updateSourceInline", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -177,7 +175,7 @@ compose.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.compose.updateSourceGit", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.compose.updateSourceGit", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );
@@ -201,7 +199,7 @@ compose.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("services.compose.updateEnv", { ...p, ...body }, c.get("token"));
+        await callTrpc("services.compose.updateEnv", { ...p, ...body });
         return c.json({ ok: true }, 200);
     }
 );

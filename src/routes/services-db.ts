@@ -20,8 +20,6 @@ import {
 } from "../schemas/services.js";
 import { ErrorSchema, SuccessSchema, ServiceParamsSchema } from "../schemas/common.js";
 
-type Env = { Variables: { token: string } };
-
 const DB_TYPES = ["mysql", "postgres", "mariadb", "mongo", "redis"] as const;
 type DbType = (typeof DB_TYPES)[number];
 
@@ -34,7 +32,7 @@ function svc(c: any) {
 export function createDatabaseRouter(dbType: DbType) {
     const tag = `${dbType.charAt(0).toUpperCase()}${dbType.slice(1)} Services`;
     const prefix = `services.${dbType}`;
-    const db = new OpenAPIHono<Env>();
+    const db = new OpenAPIHono();
 
     // POST / — createService
     db.openapi(
@@ -52,7 +50,7 @@ export function createDatabaseRouter(dbType: DbType) {
         }),
         async (c) => {
             const body = c.req.valid("json");
-            const data = await callTrpc(`${prefix}.createService`, body, c.get("token"));
+            const data = await callTrpc(`${prefix}.createService`, body);
             return c.json(data as any, 201);
         }
     );
@@ -72,7 +70,7 @@ export function createDatabaseRouter(dbType: DbType) {
             },
         }),
         async (c) => {
-            const data = await callTrpc(`${prefix}.inspectService`, svc(c), c.get("token"));
+            const data = await callTrpc(`${prefix}.inspectService`, svc(c));
             return c.json(data as any, 200);
         }
     );
@@ -91,7 +89,7 @@ export function createDatabaseRouter(dbType: DbType) {
             },
         }),
         async (c) => {
-            await callTrpc(`${prefix}.destroyService`, svc(c), c.get("token"));
+            await callTrpc(`${prefix}.destroyService`, svc(c));
             return c.json({ ok: true }, 200);
         }
     );
@@ -110,7 +108,7 @@ export function createDatabaseRouter(dbType: DbType) {
             },
         }),
         async (c) => {
-            await callTrpc(`${prefix}.enableService`, svc(c), c.get("token"));
+            await callTrpc(`${prefix}.enableService`, svc(c));
             return c.json({ ok: true }, 200);
         }
     );
@@ -129,7 +127,7 @@ export function createDatabaseRouter(dbType: DbType) {
             },
         }),
         async (c) => {
-            await callTrpc(`${prefix}.disableService`, svc(c), c.get("token"));
+            await callTrpc(`${prefix}.disableService`, svc(c));
             return c.json({ ok: true }, 200);
         }
     );
@@ -153,7 +151,7 @@ export function createDatabaseRouter(dbType: DbType) {
         async (c) => {
             const body = c.req.valid("json");
             const p = svc(c);
-            await callTrpc(`${prefix}.updateCredentials`, { ...p, ...body }, c.get("token"));
+            await callTrpc(`${prefix}.updateCredentials`, { ...p, ...body });
             return c.json({ ok: true }, 200);
         }
     );
@@ -177,7 +175,7 @@ export function createDatabaseRouter(dbType: DbType) {
         async (c) => {
             const body = c.req.valid("json");
             const p = svc(c);
-            await callTrpc(`${prefix}.updateResources`, { ...p, ...body }, c.get("token"));
+            await callTrpc(`${prefix}.updateResources`, { ...p, ...body });
             return c.json({ ok: true }, 200);
         }
     );
@@ -201,7 +199,7 @@ export function createDatabaseRouter(dbType: DbType) {
         async (c) => {
             const body = c.req.valid("json");
             const p = svc(c);
-            await callTrpc(`${prefix}.exposeService`, { ...p, ...body }, c.get("token"));
+            await callTrpc(`${prefix}.exposeService`, { ...p, ...body });
             return c.json({ ok: true }, 200);
         }
     );

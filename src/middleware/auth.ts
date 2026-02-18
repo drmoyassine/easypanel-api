@@ -1,34 +1,34 @@
 import { createMiddleware } from "hono/factory";
-import { callTrpc } from "../lib/trpc-client.js";
 
 /**
- * Auth middleware — extracts Bearer token, validates it against
- * Easypanel's auth endpoint, and stores the token on context.
+ * Auth middleware — validates API_SECRET from the Authorization header.
  *
- * Usage in routes: `const token = c.get("token");`
+ * External callers authenticate with:
+ *   Authorization: Bearer <API_SECRET>
+ *
+ * The gateway manages its own Easypanel session internally
+ * (see token-manager.ts). Callers never touch Easypanel credentials.
  */
-export const authMiddleware = createMiddleware<{
-    Variables: { token: string };
-}>(async (c, next) => {
+export const authMiddleware = createMiddleware(async (c, next) => {
+    const apiSecret = process.env.API_SECRET;
+
+    if (!apiSecret) {
+        // No API_SECRET set → gateway is unprotected (dev mode)
+        await next();
+        return;
+    }
+
     const authHeader = c.req.header("Authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return c.json({ error: "Missing or invalid Authorization header" }, 401);
+        return c.json({ error: "Missing Authorization: Bearer <API_SECRET>" }, 401);
     }
 
     const token = authHeader.slice(7).trim();
 
-    if (!token) {
-        return c.json({ error: "Empty token" }, 401);
+    if (token !== apiSecret) {
+        return c.json({ error: "Invalid API secret" }, 401);
     }
 
-    try {
-        // Validate the token by calling Easypanel's auth check
-        await callTrpc("auth.getUser", {}, token);
-    } catch {
-        return c.json({ error: "Invalid or expired token" }, 401);
-    }
-
-    c.set("token", token);
     await next();
 });

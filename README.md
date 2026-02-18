@@ -6,9 +6,10 @@ Built by reverse-engineering the real tRPC procedures from Easypanel v2.26.3.
 
 ## Features
 
-- **90 REST endpoints** covering projects, app/compose/database services, domains, ports, mounts, templates, and monitoring
+- **88 REST endpoints** covering projects, app/compose/database services, domains, ports, mounts, templates, and monitoring
 - **OpenAPI 3.1 spec** with Swagger UI at `/docs`
-- **Session-based auth** — login with your Easypanel admin credentials, get a Bearer token
+- **Auto-authentication** — gateway logs into Easypanel on startup, manages its own session
+- **API_SECRET protection** — external callers use a simple secret, never touch Easypanel credentials
 - **Docker-ready** — deploy as a service inside Easypanel itself
 
 ## Quick Start
@@ -17,13 +18,14 @@ Built by reverse-engineering the real tRPC procedures from Easypanel v2.26.3.
 
 ```bash
 npm install
+
+# Set your Easypanel credentials
+export EASYPANEL_URL=http://your-server:3000
+export EASYPANEL_EMAIL=admin@example.com
+export EASYPANEL_PASSWORD=your-password
+export API_SECRET=my-secret-key    # optional, omit for dev mode
+
 npm run dev     # → http://localhost:3100/docs
-```
-
-Set `EASYPANEL_URL` to point at your Easypanel instance:
-
-```bash
-EASYPANEL_URL=http://your-server:3000 npm run dev
 ```
 
 ### Deploy Inside Easypanel (recommended)
@@ -31,7 +33,13 @@ EASYPANEL_URL=http://your-server:3000 npm run dev
 1. Create a project in Easypanel (e.g. `infra`)
 2. Add an **App** service → set source to this Git repo
 3. Set build type to **Dockerfile**
-4. Add env variable: `EASYPANEL_URL=http://easypanel:3000`
+4. Add environment variables:
+   ```
+   EASYPANEL_URL=http://easypanel:3000
+   EASYPANEL_EMAIL=admin@example.com
+   EASYPANEL_PASSWORD=your-password
+   API_SECRET=generate-a-strong-secret-here
+   ```
 5. Add a domain (e.g. `api.yourdomain.com`)
 6. Deploy
 
@@ -39,29 +47,25 @@ The `EASYPANEL_URL` defaults to `http://easypanel:3000` which works when running
 
 ## Authentication
 
-Easypanel does not have an API tokens page. This gateway provides a login endpoint:
+The gateway handles Easypanel auth internally. External callers just pass `API_SECRET`:
 
 ```bash
-# 1. Login to get a token
-curl -X POST http://localhost:3100/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "admin@example.com", "password": "your-password"}'
-# → {"token": "eyJhb...", "message": "Login successful"}
-
-# 2. Use the token for all API calls
-curl -H "Authorization: Bearer eyJhb..." \
+# If API_SECRET is set, all /api/v1/* endpoints require it:
+curl -H "Authorization: Bearer my-secret-key" \
      http://localhost:3100/api/v1/projects
 
-# 3. (Optional) Generate a long-lived API token
-curl -X POST http://localhost:3100/auth/api-token \
-  -H "Authorization: Bearer eyJhb..."
+# If API_SECRET is not set, endpoints are unprotected (dev mode)
+curl http://localhost:3100/api/v1/projects
+
+# Check Easypanel connection status (always public)
+curl http://localhost:3100/auth/status
 ```
 
 ## API Overview
 
 | Tag | Endpoints | Description |
 |-----|-----------|-------------|
-| Auth | 3 | Login, token generation, validation |
+| Auth | 1 | Connection status check |
 | Projects | 6 | CRUD, env vars, containers |
 | App Services | 17 | CRUD, deploy, source, build, env, resources |
 | Compose | 9 | CRUD, deploy, inline/git source |
@@ -80,10 +84,13 @@ Full interactive docs: **`http://localhost:3100/docs`**
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3100` | Gateway listen port |
-| `EASYPANEL_URL` | `http://localhost:3000` | Easypanel instance URL |
+| Variable | Default | Required | Description |
+|----------|---------|----------|-------------|
+| `PORT` | `3100` | No | Gateway listen port |
+| `EASYPANEL_URL` | `http://localhost:3000` | No | Easypanel instance URL |
+| `EASYPANEL_EMAIL` | — | **Yes** | Admin email for Easypanel login |
+| `EASYPANEL_PASSWORD` | — | **Yes** | Admin password for Easypanel login |
+| `API_SECRET` | — | No | Secret for external API auth (omit for dev mode) |
 
 ## Tech Stack
 
