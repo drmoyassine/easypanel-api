@@ -10,20 +10,21 @@ Agent instructions for working on `easypanel-api`, a REST-to-tRPC gateway that w
 src/
   index.ts              # Hono app + route mounts + OpenAPI spec
   lib/
-    trpc-client.ts      # callTrpc() — makes tRPC requests to Easypanel
+    trpc-client.ts      # callTrpc() / callTrpcQuery() — tRPC requests to Easypanel
     token-manager.ts    # Auto-auth: fetches + caches Easypanel bearer token
     errors.ts           # Global error handler (maps TrpcCallError, ZodError, etc.)
   middleware/
     auth.ts             # Bearer token validation middleware
   routes/
     projects.ts         # /api/v1/projects
-    services.ts         # /api/v1/projects/:name/services
+    services-app.ts     # /api/v1/projects/:name/services/app
+    services-db.ts      # /api/v1/projects/:name/services/{mysql,postgres,mariadb,mongo,redis}
+    compose.ts          # /api/v1/projects/:name/services/compose
     resources.ts        # /api/v1/.../domains, ports, mounts
-    ...
   schemas/
     common.ts           # Shared schemas: ServiceParamsSchema, SuccessSchema, etc.
+    services.ts         # All service create/update schemas
     resources.ts        # Domain, Port, Mount create/update schemas
-    ...
 ```
 
 ---
@@ -83,6 +84,22 @@ Merge with the tRPC input: `callTrpc("procedure", { ...p, ...body })`.
 | Delete | `{ projectName, serviceName, index: number }` |
 
 > ⚠️ The `values` field name is misleading. It holds a single item as an object, not a collection.
+
+### Compose Services
+
+| Operation | tRPC Procedure | Key Requirement |
+|-----------|----------------|-----------------|
+| Inline source | `services.compose.updateSourceInline` | Field is `content` (not `composeFile`) |
+| Git source | `services.compose.updateSourceGit` | Requires `repo`, `ref`, `rootPath`, `composeFile` (not `path`) |
+| Deploy | `services.compose.deployService` | Synchronous — waits for all containers. Pre-built images return fast; Dockerfile builds can take 10-20min |
+
+### Database Services (mysql · postgres · mariadb · mongo · redis)
+
+| Operation | tRPC Procedure | Key Requirement |
+|-----------|----------------|-----------------|
+| Expose | `services.<type>.exposeService` | Field is `exposedPort: number` — **not** `ports: number[]` |
+| Credentials | `services.<type>.updateCredentials` | Container must be **running** — call fails with `Invariant failed` if DB hasn't started yet |
+| Create Redis | `services.redis.createService` | No `password` field needed — Easypanel auto-generates it |
 
 ---
 
@@ -153,14 +170,22 @@ See `.agent/workflows/`:
 - `/deploy-vps` — fresh VPS setup
 - `/update-gateway` — redeploy after Easypanel version upgrade
 
-To validate resource routes against a live deployment:
+To validate routes against a live deployment:
 
 ```powershell
-# Probe script (discovers payload shape)
-./probe-ports-mounts.ps1
-view_file probe-output.json   # read full results
+# App services — all 16 operations
+./test-app-audit.ps1
+view_file app-audit-results.json
 
-# Full CRUD lifecycle test
+# Compose services — all endpoints incl. source and deploy
+./test-compose.ps1
+view_file compose-results.json
+
+# Database services — postgres full sweep + redis/mysql spot check
+./test-db-audit.ps1
+view_file db-audit-results.json
+
+# Legacy: resource CRUD lifecycle (domains/ports/mounts)
 ./run-final-validation.ps1
 view_file final-validation.json
 ```
@@ -173,3 +198,6 @@ view_file final-validation.json
 - ❌ Do not assume `values: [array]` for any Easypanel CRUD procedure — verify it
 - ❌ Do not read PowerShell terminal output for API diagnosis — it truncates; write to file
 - ❌ Do not leave `host` as optional in any update schema unless Easypanel explicitly allows partial updates (it generally does not)
+- ❌ Do not call `updateCredentials` immediately after `createService` — the container must be healthy first (add `Start-Sleep -Seconds 30`+)
+- ❌ Do not use `ports: [number]` for `exposeService` — use `exposedPort: number`
+- ❌ Do not use `composeFile` in `updateSourceInline` — use `content`
