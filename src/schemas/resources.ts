@@ -30,7 +30,7 @@ export const DeleteDomainSchema = z
 
 export const SetPrimaryDomainSchema = z
     .object({
-        host: z.string().openapi({ example: "app.example.com" }),
+        domainId: z.string().openapi({ example: "cmltvctxf003d07nw76rj8aq5" }),
     })
     .openapi("SetPrimaryDomain");
 
