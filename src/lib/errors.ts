@@ -11,12 +11,13 @@ export function handleError(err: Error, c: Context) {
 
     // tRPC call failure (upstream Easypanel returned an error)
     if (err instanceof TrpcCallError) {
+        let upstream: unknown = undefined;
+        if (err.details) {
+            try { upstream = JSON.parse(err.details); }
+            catch { upstream = err.details; } // truncated JSON — return raw string
+        }
         return c.json(
-            {
-                error: err.message,
-                procedure: err.procedure,
-                upstream: err.details ? JSON.parse(err.details) : undefined,
-            },
+            { error: err.message, procedure: err.procedure, upstream },
             err.status as 400
         );
     }

@@ -209,10 +209,10 @@ ports.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        // Easypanel expects: { projectName, serviceName, values: [{ published, target, protocol }] }
+        // Easypanel expects: { projectName, serviceName, values: { published, target, protocol } }
         await callTrpc("ports.createPort", {
             ...p,
-            values: [{ published: body.published, target: body.target, protocol: body.protocol ?? "tcp" }],
+            values: { published: body.published, target: body.target, protocol: body.protocol ?? "tcp" },
         });
         return c.json({ ok: true }, 201);
     }
@@ -235,9 +235,9 @@ ports.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        // Easypanel expects: { projectName, serviceName, index, values: [{ published, target, protocol }] }
+        // Easypanel expects: { projectName, serviceName, index, values: { published, target, protocol } }
         const { index, ...portData } = body;
-        await callTrpc("ports.updatePort", { ...p, index, values: [portData] });
+        await callTrpc("ports.updatePort", { ...p, index, values: portData });
         return c.json({ ok: true }, 200);
     }
 );
@@ -305,10 +305,10 @@ mounts.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        // Easypanel expects: { projectName, serviceName, values: [{ type, name, mountPath, ... }] }
+        // Easypanel expects: { projectName, serviceName, values: { type, name, mountPath, ... } }
         await callTrpc("mounts.createMount", {
             ...p,
-            values: [{ type: body.type ?? "volume", name: body.name, mountPath: body.mountPath, hostPath: body.hostPath }],
+            values: { type: body.type ?? "volume", name: body.name, mountPath: body.mountPath, hostPath: body.hostPath },
         });
         return c.json({ ok: true }, 201);
     }
@@ -331,9 +331,9 @@ mounts.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        // Easypanel expects: { projectName, serviceName, index, values: [{ fields }] }
+        // Easypanel expects: { projectName, serviceName, index, values: { fields } }
         const { index, ...mountData } = body;
-        await callTrpc("mounts.updateMount", { ...p, index, values: [mountData] });
+        await callTrpc("mounts.updateMount", { ...p, index, values: mountData });
         return c.json({ ok: true }, 200);
     }
 );
