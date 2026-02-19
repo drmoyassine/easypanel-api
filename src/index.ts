@@ -79,6 +79,13 @@ app.use("/api/v1/*", authMiddleware);
 
 app.route("/api/v1/projects", projects);
 
+// ── Domains, Ports, Mounts (per-service resources) ───────────
+// Registered BEFORE service routes to avoid /:serviceName conflict
+
+app.route("/api/v1/projects/:projectName/services/:serviceName/domains", domains);
+app.route("/api/v1/projects/:projectName/services/:serviceName/ports", ports);
+app.route("/api/v1/projects/:projectName/services/:serviceName/mounts", mounts);
+
 // ── App services ─────────────────────────────────────────────
 
 app.route("/api/v1/projects/:projectName/services/app", appServices);
@@ -94,12 +101,6 @@ app.route("/api/v1/projects/:projectName/services/redis", redisRouter);
 // ── Compose services ─────────────────────────────────────────
 
 app.route("/api/v1/projects/:projectName/services/compose", compose);
-
-// ── Domains, Ports, Mounts (per-service resources) ───────────
-
-app.route("/api/v1/projects/:projectName/services/:serviceName/domains", domains);
-app.route("/api/v1/projects/:projectName/services/:serviceName/ports", ports);
-app.route("/api/v1/projects/:projectName/services/:serviceName/mounts", mounts);
 
 // ── Templates ────────────────────────────────────────────────
 
