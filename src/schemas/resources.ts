@@ -4,8 +4,6 @@ import { z } from "@hono/zod-openapi";
 
 export const CreateDomainSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         host: z.string().openapi({ example: "app.example.com" }),
         https: z.boolean().default(true).openapi({ example: true }),
         port: z.number().default(80).openapi({ example: 3000 }),
@@ -16,8 +14,6 @@ export const CreateDomainSchema = z
 
 export const UpdateDomainSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         host: z.string().openapi({ example: "app.example.com" }),
         https: z.boolean().optional(),
         port: z.number().optional(),
@@ -28,16 +24,12 @@ export const UpdateDomainSchema = z
 
 export const DeleteDomainSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         host: z.string().openapi({ example: "app.example.com" }),
     })
     .openapi("DeleteDomain");
 
 export const SetPrimaryDomainSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         host: z.string().openapi({ example: "app.example.com" }),
     })
     .openapi("SetPrimaryDomain");
@@ -58,8 +50,6 @@ export const DomainListSchema = z.array(DomainSchema).openapi("DomainList");
 
 export const CreatePortSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         published: z.number().openapi({ example: 8080, description: "Host port" }),
         target: z.number().openapi({ example: 80, description: "Container port" }),
         protocol: z.enum(["tcp", "udp"]).default("tcp").openapi({ example: "tcp" }),
@@ -68,8 +58,6 @@ export const CreatePortSchema = z
 
 export const UpdatePortSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         published: z.number(),
         target: z.number(),
         protocol: z.enum(["tcp", "udp"]).optional(),
@@ -79,8 +67,6 @@ export const UpdatePortSchema = z
 
 export const DeletePortSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         published: z.number(),
         target: z.number(),
         protocol: z.enum(["tcp", "udp"]).optional(),
@@ -102,8 +88,6 @@ export const PortListSchema = z.array(PortSchema).openapi("PortList");
 
 export const CreateMountSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         name: z.string().openapi({ example: "data" }),
         mountPath: z.string().openapi({ example: "/app/data" }),
         hostPath: z.string().optional().openapi({ example: "/mnt/data" }),
@@ -113,8 +97,6 @@ export const CreateMountSchema = z
 
 export const UpdateMountSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         name: z.string(),
         mountPath: z.string().optional(),
         hostPath: z.string().optional(),
@@ -124,8 +106,6 @@ export const UpdateMountSchema = z
 
 export const DeleteMountSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         name: z.string(),
     })
     .openapi("DeleteMount");

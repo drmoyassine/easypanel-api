@@ -14,8 +14,6 @@ export const CreateAppServiceSchema = z
 
 export const UpdateSourceGithubSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         owner: z.string().openapi({ example: "myorg" }),
         repo: z.string().openapi({ example: "myrepo" }),
         ref: z.string().optional().openapi({ example: "main" }),
@@ -27,8 +25,6 @@ export const UpdateSourceGithubSchema = z
 
 export const UpdateSourceGitSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         repo: z.string().openapi({ example: "https://github.com/org/repo.git" }),
         ref: z.string().optional().openapi({ example: "main" }),
         path: z.string().optional().openapi({ example: "/" }),
@@ -38,8 +34,6 @@ export const UpdateSourceGitSchema = z
 
 export const UpdateSourceImageSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         image: z.string().openapi({ example: "nginx:latest" }),
         username: z.string().optional(),
         password: z.string().optional(),
@@ -49,8 +43,6 @@ export const UpdateSourceImageSchema = z
 
 export const UpdateSourceDockerfileSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         dockerfile: z.string().openapi({ example: "FROM node:20\nCOPY . .\nRUN npm install" }),
     })
     .passthrough()
@@ -58,8 +50,6 @@ export const UpdateSourceDockerfileSchema = z
 
 export const UpdateBuildSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         type: z.string().optional().openapi({ example: "nixpacks" }),
     })
     .passthrough()
@@ -67,8 +57,6 @@ export const UpdateBuildSchema = z
 
 export const UpdateEnvSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         env: z.string().openapi({
             example: "DATABASE_URL=postgres://...\nNODE_ENV=production",
             description: "Environment variables as KEY=VALUE pairs, one per line",
@@ -78,8 +66,6 @@ export const UpdateEnvSchema = z
 
 export const UpdateResourcesSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         memoryLimit: z.number().optional().openapi({ example: 512 }),
         memoryReservation: z.number().optional().openapi({ example: 256 }),
         cpuLimit: z.number().optional().openapi({ example: 1 }),
@@ -90,8 +76,6 @@ export const UpdateResourcesSchema = z
 
 export const UpdateDeploySchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         replicas: z.number().optional().openapi({ example: 1 }),
         command: z.string().optional().openapi({ example: "npm start" }),
         zeroDowntime: z.boolean().optional().openapi({ example: true }),
@@ -101,8 +85,6 @@ export const UpdateDeploySchema = z
 
 export const UpdateBasicAuthSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         enabled: z.boolean().openapi({ example: false }),
         credentials: z.string().optional().openapi({ example: "user:password" }),
     })
@@ -111,8 +93,6 @@ export const UpdateBasicAuthSchema = z
 
 export const UpdateMaintenanceSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         enabled: z.boolean().openapi({ example: false }),
     })
     .passthrough()
@@ -120,8 +100,6 @@ export const UpdateMaintenanceSchema = z
 
 export const UpdateRedirectsSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         redirects: z.array(z.object({}).passthrough()).optional(),
     })
     .passthrough()
@@ -147,8 +125,6 @@ export const CreateDatabaseServiceSchema = z
 
 export const UpdateCredentialsSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         password: z.string().openapi({ example: "newsecret" }),
         rootPassword: z.string().optional(),
     })
@@ -157,8 +133,6 @@ export const UpdateCredentialsSchema = z
 
 export const ExposeServiceSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         ports: z.array(z.number()).optional(),
     })
     .passthrough()
@@ -178,8 +152,6 @@ export const CreateComposeServiceSchema = z
 
 export const UpdateSourceInlineSchema = z
     .object({
-        projectName: z.string(),
-        serviceName: z.string(),
         composeFile: z.string().openapi({
             example: "version: '3.8'\nservices:\n  web:\n    image: nginx",
             description: "Docker Compose YAML content",
