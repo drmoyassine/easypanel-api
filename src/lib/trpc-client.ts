@@ -53,7 +53,10 @@ async function doTrpcFetch(
     };
     if (token) {
         headers.Cookie = `ez-token=${token}`;
+        headers.Authorization = `Bearer ${token}`;
     }
+
+    console.log(`[trpc] → POST ${procedure} (token: ${token ? token.slice(0, 8) + "..." : "none"})`);
 
     const res = await fetch(url, {
         method: "POST",
@@ -68,9 +71,11 @@ async function doTrpcFetch(
         const message =
             trpcErr.error?.message || `tRPC call failed: ${procedure}`;
         const status = trpcErr.error?.data?.httpStatus || res.status || 500;
-        console.error(`[trpc] ${procedure} failed (${res.status}):`, JSON.stringify(body));
+        console.error(`[trpc] ✗ ${procedure} failed (HTTP ${res.status}):`, JSON.stringify(body).slice(0, 500));
         throw new TrpcCallError(message, status, procedure);
     }
+
+    console.log(`[trpc] ✓ ${procedure} OK`);
 
     return { body, res };
 }
