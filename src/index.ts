@@ -81,25 +81,25 @@ app.route("/api/v1/projects", projects);
 
 // ── App services ─────────────────────────────────────────────
 
-app.route("/api/v1/services/app", appServices);
+app.route("/api/v1/projects/:projectName/services/app", appServices);
 
 // ── Database services ────────────────────────────────────────
 
-app.route("/api/v1/services/mysql", mysqlRouter);
-app.route("/api/v1/services/postgres", postgresRouter);
-app.route("/api/v1/services/mariadb", mariadbRouter);
-app.route("/api/v1/services/mongo", mongoRouter);
-app.route("/api/v1/services/redis", redisRouter);
+app.route("/api/v1/projects/:projectName/services/mysql", mysqlRouter);
+app.route("/api/v1/projects/:projectName/services/postgres", postgresRouter);
+app.route("/api/v1/projects/:projectName/services/mariadb", mariadbRouter);
+app.route("/api/v1/projects/:projectName/services/mongo", mongoRouter);
+app.route("/api/v1/projects/:projectName/services/redis", redisRouter);
 
 // ── Compose services ─────────────────────────────────────────
 
-app.route("/api/v1/services/compose", compose);
+app.route("/api/v1/projects/:projectName/services/compose", compose);
 
 // ── Domains, Ports, Mounts (per-service resources) ───────────
 
-app.route("/api/v1/domains", domains);
-app.route("/api/v1/ports", ports);
-app.route("/api/v1/mounts", mounts);
+app.route("/api/v1/projects/:projectName/services/:serviceName/domains", domains);
+app.route("/api/v1/projects/:projectName/services/:serviceName/ports", ports);
+app.route("/api/v1/projects/:projectName/services/:serviceName/mounts", mounts);
 
 // ── Templates ────────────────────────────────────────────────
 
