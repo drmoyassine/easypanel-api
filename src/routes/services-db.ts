@@ -10,7 +10,7 @@
  * We expose one set of routes per DB type via a factory function.
  */
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { callTrpc } from "../lib/trpc-client.js";
+import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
 import {
     CreateDatabaseServiceSchema,
     UpdateCredentialsSchema,
@@ -70,7 +70,7 @@ export function createDatabaseRouter(dbType: DbType) {
             },
         }),
         async (c) => {
-            const data = await callTrpc(`${prefix}.inspectService`, svc(c));
+            const data = await callTrpcQuery(`${prefix}.inspectService`, svc(c));
             return c.json(data as any, 200);
         }
     );

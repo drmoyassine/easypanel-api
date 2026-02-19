@@ -3,7 +3,7 @@
  * Real tRPC: templates.createFromSchema, monitor.getSystemStats, etc.
  */
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { callTrpc } from "../lib/trpc-client.js";
+import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
 import {
     CreateFromSchemaSchema,
     SystemStatsSchema,
@@ -60,7 +60,7 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("monitor.getSystemStats", {});
+        const data = await callTrpcQuery("monitor.getSystemStats", {});
         return c.json(data as any, 200);
     }
 );
@@ -78,7 +78,7 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("monitor.getStorageStats", {});
+        const data = await callTrpcQuery("monitor.getStorageStats", {});
         return c.json(data as any, 200);
     }
 );
@@ -96,7 +96,7 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("monitor.getMonitorTableData", {});
+        const data = await callTrpcQuery("monitor.getMonitorTableData", {});
         return c.json(data as any, 200);
     }
 );

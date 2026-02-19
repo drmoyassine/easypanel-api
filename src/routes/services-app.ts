@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { callTrpc } from "../lib/trpc-client.js";
+import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
 import {
     CreateAppServiceSchema,
     UpdateSourceGithubSchema,
@@ -63,7 +63,7 @@ app.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("services.app.inspectService", svc(c));
+        const data = await callTrpcQuery("services.app.inspectService", svc(c));
         return c.json(data as any, 200);
     }
 );

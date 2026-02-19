@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { callTrpc } from "../lib/trpc-client.js";
+import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
 import {
     CreateProjectSchema,
     ProjectSchema,
@@ -26,7 +26,7 @@ projects.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("projects.listProjects", {});
+        const data = await callTrpcQuery("projects.listProjects", {});
         return c.json(data as any, 200);
     }
 );
@@ -70,7 +70,7 @@ projects.openapi(
     }),
     async (c) => {
         const { projectName } = c.req.valid("param");
-        const data = await callTrpc("projects.inspectProject", { projectName });
+        const data = await callTrpcQuery("projects.inspectProject", { projectName });
         return c.json(data as any, 200);
     }
 );
@@ -138,7 +138,7 @@ projects.openapi(
     }),
     async (c) => {
         const { projectName } = c.req.valid("param");
-        const data = await callTrpc("projects.getDockerContainers", { projectName });
+        const data = await callTrpcQuery("projects.getDockerContainers", { projectName });
         return c.json(data as any, 200);
     }
 );

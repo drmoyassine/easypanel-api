@@ -4,7 +4,7 @@
  * Real tRPC routers: domains.*, ports.*, mounts.*
  */
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { callTrpc } from "../lib/trpc-client.js";
+import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
 import {
     CreateDomainSchema, UpdateDomainSchema, DeleteDomainSchema,
     SetPrimaryDomainSchema, DomainListSchema,
@@ -36,7 +36,7 @@ domains.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("domains.listDomains", svc(c));
+        const data = await callTrpcQuery("domains.listDomains", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -147,7 +147,7 @@ ports.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("ports.listPorts", svc(c));
+        const data = await callTrpcQuery("ports.listPorts", svc(c));
         return c.json(data as any, 200);
     }
 );
@@ -236,7 +236,7 @@ mounts.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpc("mounts.listMounts", svc(c));
+        const data = await callTrpcQuery("mounts.listMounts", svc(c));
         return c.json(data as any, 200);
     }
 );

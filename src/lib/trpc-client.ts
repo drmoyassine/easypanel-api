@@ -2,10 +2,14 @@
  * Raw tRPC HTTP client for Easypanel.
  *
  * Easypanel exposes its internal API as tRPC procedures on port 3000.
- * We call them directly via POST with a JSON body — no SDK needed.
+ * We call them directly via HTTP — no SDK needed.
+ *
+ * tRPC convention:
+ *   - Queries  → GET  with ?input=... (URL-encoded JSON)
+ *   - Mutations → POST with JSON body
  *
  * The token is auto-managed by token-manager.ts. Route handlers
- * simply call `callTrpc("procedure", input)` without thinking about auth.
+ * simply call `callTrpc("procedure", input)` or `callTrpcQuery("procedure", input)`.
  */
 
 import { getEasypanelToken, invalidateToken } from "./token-manager.js";
@@ -39,31 +43,43 @@ export interface TrpcRawResult<T = unknown> {
 }
 
 /**
- * Internal fetch wrapper.
+ * Internal fetch wrapper — supports both GET (query) and POST (mutation).
  */
 async function doTrpcFetch(
     procedure: string,
     input: unknown,
-    token?: string
+    token?: string,
+    method: "GET" | "POST" = "POST"
 ): Promise<{ body: Record<string, unknown>; res: Response }> {
-    const url = `${EASYPANEL_BASE_URL}/api/trpc/${procedure}`;
-
-    const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-    };
+    const headers: Record<string, string> = {};
     if (token) {
         headers.Cookie = `ez-token=${token}`;
         headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log(`[trpc] → POST ${procedure} (token: ${token ? token.slice(0, 8) + "..." : "none"})`);
+    let url: string;
+    let fetchOptions: RequestInit;
 
-    const res = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ json: input }),
-    });
+    if (method === "GET") {
+        // Queries: input as URL query param
+        const inputStr = JSON.stringify({ json: input });
+        const encoded = encodeURIComponent(inputStr);
+        url = `${EASYPANEL_BASE_URL}/api/trpc/${procedure}?input=${encoded}`;
+        fetchOptions = { method: "GET", headers };
+    } else {
+        // Mutations: input as POST body
+        url = `${EASYPANEL_BASE_URL}/api/trpc/${procedure}`;
+        headers["Content-Type"] = "application/json";
+        fetchOptions = {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ json: input }),
+        };
+    }
 
+    console.log(`[trpc] → ${method} ${procedure}`);
+
+    const res = await fetch(url, fetchOptions);
     const body = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok || "error" in body) {
@@ -71,56 +87,73 @@ async function doTrpcFetch(
         const message =
             trpcErr.error?.message || `tRPC call failed: ${procedure}`;
         const status = trpcErr.error?.data?.httpStatus || res.status || 500;
-        console.error(`[trpc] ✗ ${procedure} failed (HTTP ${res.status}):`, JSON.stringify(body).slice(0, 500));
+        console.error(
+            `[trpc] ✗ ${procedure} failed (HTTP ${res.status}):`,
+            JSON.stringify(body).slice(0, 500)
+        );
         throw new TrpcCallError(message, status, procedure);
     }
 
     console.log(`[trpc] ✓ ${procedure} OK`);
-
     return { body, res };
 }
 
+// ── Public API ───────────────────────────────────────────────
+
 /**
- * Call an Easypanel tRPC procedure.
- * Token is fetched automatically from token-manager.
- * On 401, the token is refreshed and the call retried once.
- *
- * @param procedure - Dot-separated procedure name, e.g. "projects.listProjects"
- * @param input     - JSON-serializable input payload
+ * Call a tRPC MUTATION (POST). Auto-manages token, retries on 401.
  */
 export async function callTrpc<T = unknown>(
     procedure: string,
     input: unknown = {}
 ): Promise<T> {
-    const token = await getEasypanelToken();
+    return callInternal<T>(procedure, input, "POST");
+}
 
-    try {
-        const { body } = await doTrpcFetch(procedure, input, token);
-        return (body as unknown as TrpcResult<T>).result.data.json;
-    } catch (err) {
-        // If 401 (expired session), refresh token and retry once
-        if (err instanceof TrpcCallError && err.status === 401) {
-            invalidateToken();
-            const freshToken = await getEasypanelToken();
-            const { body } = await doTrpcFetch(procedure, input, freshToken);
-            return (body as unknown as TrpcResult<T>).result.data.json;
-        }
-        throw err;
-    }
+/**
+ * Call a tRPC QUERY (GET). Auto-manages token, retries on 401.
+ */
+export async function callTrpcQuery<T = unknown>(
+    procedure: string,
+    input: unknown = {}
+): Promise<T> {
+    return callInternal<T>(procedure, input, "GET");
 }
 
 /**
  * Call a tRPC procedure WITHOUT auto-token (used by token-manager for login).
- * This variant DOES NOT use token-manager to avoid circular dependencies.
  */
 export async function callTrpcRaw<T = unknown>(
     procedure: string,
     input: unknown = {},
     token?: string
 ): Promise<TrpcRawResult<T>> {
-    const { body, res } = await doTrpcFetch(procedure, input, token);
+    const { body, res } = await doTrpcFetch(procedure, input, token, "POST");
     const data = (body as unknown as TrpcResult<T>).result.data.json;
     return { data, headers: res.headers };
+}
+
+// ── Internal ─────────────────────────────────────────────────
+
+async function callInternal<T>(
+    procedure: string,
+    input: unknown,
+    method: "GET" | "POST"
+): Promise<T> {
+    const token = await getEasypanelToken();
+
+    try {
+        const { body } = await doTrpcFetch(procedure, input, token, method);
+        return (body as unknown as TrpcResult<T>).result.data.json;
+    } catch (err) {
+        if (err instanceof TrpcCallError && err.status === 401) {
+            invalidateToken();
+            const freshToken = await getEasypanelToken();
+            const { body } = await doTrpcFetch(procedure, input, freshToken, method);
+            return (body as unknown as TrpcResult<T>).result.data.json;
+        }
+        throw err;
+    }
 }
 
 /**
