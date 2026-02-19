@@ -58,16 +58,25 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        // Easypanel requires these fields — auto-generate defaults
+        // Build the payload in Easypanel's expected format
         const domainPayload = {
             ...p,
-            ...body,
             id: crypto.randomUUID().replace(/-/g, "").slice(0, 25),
-            middlewares: body.middlewares ?? [],
-            certificateResolver: body.certificateResolver ?? "",
-            wildcard: body.wildcard ?? false,
-            internalProtocol: body.internalProtocol ?? "http",
-            service: body.service ?? "",
+            host: body.host,
+            https: body.https ?? true,
+            path: body.path ?? "/",
+            middlewares: [],
+            certificateResolver: "",
+            wildcard: false,
+            destinationType: "service",
+            serviceDestination: {
+                protocol: body.protocol ?? "http",
+                port: body.port ?? 80,
+                path: body.path ?? "/",
+                projectName: p.projectName,
+                serviceName: p.serviceName,
+                composeService: null,
+            },
         };
         await callTrpc("domains.createDomain", domainPayload);
         return c.json({ ok: true }, 201);
