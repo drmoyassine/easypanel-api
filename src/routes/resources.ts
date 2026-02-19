@@ -75,7 +75,7 @@ domains.openapi(
                 path: body.path ?? "/",
                 projectName: p.projectName,
                 serviceName: p.serviceName,
-                composeService: null,
+                composeService: "",
             },
         };
         await callTrpc("domains.createDomain", domainPayload);
