@@ -68,6 +68,7 @@ async function doTrpcFetch(
         const message =
             trpcErr.error?.message || `tRPC call failed: ${procedure}`;
         const status = trpcErr.error?.data?.httpStatus || res.status || 500;
+        console.error(`[trpc] ${procedure} failed (${res.status}):`, JSON.stringify(body));
         throw new TrpcCallError(message, status, procedure);
     }
 
