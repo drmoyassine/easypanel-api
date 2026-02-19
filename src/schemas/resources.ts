@@ -16,7 +16,7 @@ export const CreateDomainSchema = z
 export const UpdateDomainSchema = z
     .object({
         domainId: z.string().openapi({ example: "cmltvacp7003c07nw4ni4765c", description: "Domain ID to update" }),
-        host: z.string().optional().openapi({ example: "app.example.com" }),
+        host: z.string().openapi({ example: "app.example.com" }),
         https: z.boolean().optional(),
         port: z.number().optional(),
         path: z.string().optional(),

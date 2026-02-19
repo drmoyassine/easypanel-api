@@ -1,0 +1,98 @@
+[
+  {
+    "label": "cleanup-port-9091",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "cleanup-mount-tv",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "cleanup-domain-api-test.com",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "cleanup-domain-api-test-manual.com",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "domain-list-initial",
+    "status": 200,
+    "body": "[{\"id\":\"cmltvacp7003c07nw4ni4765c\",\"https\":true,\"host\":\"hello-world-app.4ky7uo.easypanel.host\",\"path\":\"/\",\"middlewares\":[],\"certificateResolver\":\"\",\"wildcard\":false,\"destinationType\":\"service\",\"serviceDestination\":{\"protocol\":\"http\",\"port\":8000,\"path\":\"/\",\"projectName\":\"hello-world\",\"serviceName\":\"app\",\"composeService\":\"\"}},{\"id\":\"cmltvctxf003d07nw76rj8aq5\",\"https\":true,\"host\":\"hello.4ky7uo.easypanel.host\",\"path\":\"/\",\"middlewares\":[],\"certificateResolver\":\"\",\"wildcard\":false,\"destinationType\":\"service\",\"serviceDestination\":{\"protocol\":\"http\",\"port\":8000,\"path\":\"/\",\"projectName\":\"hello-world\",\"serviceName\":\"app\",\"composeService\":\"\"}}]"
+  },
+  {
+    "label": "domain-create",
+    "status": 201,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "domain-update",
+    "status": 400,
+    "body": "{\"error\":\"tRPC call failed: domains.updateDomain\",\"procedure\":\"domains.updateDomain\",\"upstream\":{\"error\":{\"json\":{\"message\":\"[\\n  {\\n    \\\"code\\\": \\\"invalid_type\\\",\\n    \\\"expected\\\": \\\"string\\\",\\n    \\\"received\\\": \\\"undefined\\\",\\n    \\\"path\\\": [\\n      \\\"host\\\"\\n    ],\\n    \\\"message\\\": \\\"Required\\\"\\n  }\\n]\",\"code\":-32600,\"data\":{\"code\":\"BAD_REQUEST\",\"httpStatus\":400,\"path\":\"domains.updateDomain\",\"zodErrors\":{\"host\":\"Required\"}}}}}}"
+  },
+  {
+    "label": "domain-delete",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "domain-list-final",
+    "status": 200,
+    "body": "[{\"id\":\"cmltvacp7003c07nw4ni4765c\",\"https\":true,\"host\":\"hello-world-app.4ky7uo.easypanel.host\",\"path\":\"/\",\"middlewares\":[],\"certificateResolver\":\"\",\"wildcard\":false,\"destinationType\":\"service\",\"serviceDestination\":{\"protocol\":\"http\",\"port\":8000,\"path\":\"/\",\"projectName\":\"hello-world\",\"serviceName\":\"app\",\"composeService\":\"\"}},{\"id\":\"cmltvctxf003d07nw76rj8aq5\",\"https\":true,\"host\":\"hello.4ky7uo.easypanel.host\",\"path\":\"/\",\"middlewares\":[],\"certificateResolver\":\"\",\"wildcard\":false,\"destinationType\":\"service\",\"serviceDestination\":{\"protocol\":\"http\",\"port\":8000,\"path\":\"/\",\"projectName\":\"hello-world\",\"serviceName\":\"app\",\"composeService\":\"\"}}]"
+  },
+  {
+    "label": "port-list-initial",
+    "status": 200,
+    "body": "[]"
+  },
+  {
+    "label": "port-create",
+    "status": 201,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "port-update",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "port-delete",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "port-list-final",
+    "status": 200,
+    "body": "[]"
+  },
+  {
+    "label": "mount-list-initial",
+    "status": 200,
+    "body": "[]"
+  },
+  {
+    "label": "mount-create",
+    "status": 201,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "mount-update",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "mount-delete",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "mount-list-final",
+    "status": 200,
+    "body": "[]"
+  }
+]
+SCRIPT_DONE
