@@ -152,10 +152,23 @@ export const CreateComposeServiceSchema = z
 
 export const UpdateSourceInlineSchema = z
     .object({
-        composeFile: z.string().openapi({
+        content: z.string().openapi({
             example: "version: '3.8'\nservices:\n  web:\n    image: nginx",
-            description: "Docker Compose YAML content",
+            description: "Docker Compose YAML content (Easypanel field: content)",
         }),
     })
     .passthrough()
     .openapi("UpdateSourceInline");
+
+// Compose-specific Git source — distinct from app UpdateSourceGitSchema
+export const UpdateComposeSourceGitSchema = z
+    .object({
+        repo: z.string().openapi({ example: "https://github.com/org/repo.git" }),
+        ref: z.string().optional().openapi({ example: "main" }),
+        rootPath: z.string().openapi({ example: "/", description: "Path within repo where compose file lives" }),
+        composeFile: z.string().openapi({ example: "docker-compose.yml", description: "Compose file name within rootPath" }),
+        username: z.string().optional(),
+        password: z.string().optional(),
+    })
+    .passthrough()
+    .openapi("UpdateComposeSourceGit");

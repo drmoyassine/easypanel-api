@@ -1,0 +1,56 @@
+[
+  {
+    "id": "cmltvacp7003c07nw4ni4765c",
+    "https": true,
+    "host": "hello-world-app.4ky7uo.easypanel.host",
+    "path": "/",
+    "middlewares": [],
+    "certificateResolver": "",
+    "wildcard": false,
+    "destinationType": "service",
+    "serviceDestination": {
+      "protocol": "http",
+      "port": 8000,
+      "path": "/",
+      "projectName": "hello-world",
+      "serviceName": "app",
+      "composeService": ""
+    }
+  },
+  {
+    "id": "cmltvctxf003d07nw76rj8aq5",
+    "https": true,
+    "host": "hello.4ky7uo.easypanel.host",
+    "path": "/",
+    "middlewares": [],
+    "certificateResolver": "",
+    "wildcard": false,
+    "destinationType": "service",
+    "serviceDestination": {
+      "protocol": "http",
+      "port": 8000,
+      "path": "/",
+      "projectName": "hello-world",
+      "serviceName": "app",
+      "composeService": ""
+    }
+  },
+  {
+    "id": "cmltyfsm4004e07nw58dxf0bq",
+    "https": true,
+    "host": "api-update-test.com",
+    "path": "/",
+    "middlewares": [],
+    "certificateResolver": "",
+    "wildcard": false,
+    "destinationType": "service",
+    "serviceDestination": {
+      "protocol": "http",
+      "port": 80,
+      "path": "/",
+      "projectName": "hello-world",
+      "serviceName": "app",
+      "composeService": ""
+    }
+  }
+]

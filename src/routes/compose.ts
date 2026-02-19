@@ -3,7 +3,7 @@ import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
 import {
     CreateComposeServiceSchema,
     UpdateSourceInlineSchema,
-    UpdateSourceGitSchema,
+    UpdateComposeSourceGitSchema,
     UpdateEnvSchema,
     ServiceInspectSchema,
 } from "../schemas/services.js";
@@ -166,7 +166,7 @@ compose.openapi(
         security: [{ Bearer: [] }],
         request: {
             params: ServiceParamsSchema,
-            body: { content: { "application/json": { schema: UpdateSourceGitSchema } }, required: true },
+            body: { content: { "application/json": { schema: UpdateComposeSourceGitSchema } }, required: true },
         },
         responses: {
             200: { content: { "application/json": { schema: SuccessSchema } }, description: "Updated" },

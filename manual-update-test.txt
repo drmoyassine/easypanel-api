@@ -1,0 +1,7 @@
+CREATE: 201 {"ok":true}
+FOUND: 
+UPDATE BODY: {"domainId":"","host":"api-update-test.com","https":false}
+UPDATE: 404 404 page not found
+
+DELETE: 404 404 page not found
+
