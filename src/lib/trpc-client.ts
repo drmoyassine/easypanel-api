@@ -87,11 +87,12 @@ async function doTrpcFetch(
         const message =
             trpcErr.error?.message || `tRPC call failed: ${procedure}`;
         const status = trpcErr.error?.data?.httpStatus || res.status || 500;
+        const rawBody = JSON.stringify(body).slice(0, 500);
         console.error(
             `[trpc] ✗ ${procedure} failed (HTTP ${res.status}):`,
-            JSON.stringify(body).slice(0, 500)
+            rawBody
         );
-        throw new TrpcCallError(message, status, procedure);
+        throw new TrpcCallError(message, status, procedure, rawBody);
     }
 
     console.log(`[trpc] ✓ ${procedure} OK`);
@@ -162,11 +163,13 @@ async function callInternal<T>(
 export class TrpcCallError extends Error {
     public readonly status: number;
     public readonly procedure: string;
+    public readonly details?: string;
 
-    constructor(message: string, status: number, procedure: string) {
+    constructor(message: string, status: number, procedure: string, details?: string) {
         super(message);
         this.name = "TrpcCallError";
         this.status = status;
         this.procedure = procedure;
+        this.details = details;
     }
 }

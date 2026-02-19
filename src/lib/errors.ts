@@ -15,6 +15,7 @@ export function handleError(err: Error, c: Context) {
             {
                 error: err.message,
                 procedure: err.procedure,
+                upstream: err.details ? JSON.parse(err.details) : undefined,
             },
             err.status as 400
         );
