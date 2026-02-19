@@ -8,6 +8,7 @@ export const CreateDomainSchema = z
         https: z.boolean().default(true).openapi({ example: true }),
         port: z.number().default(80).openapi({ example: 3000 }),
         path: z.string().default("/").openapi({ example: "/" }),
+        protocol: z.string().optional().openapi({ example: "http", description: "Backend protocol (http/https)" }),
     })
     .passthrough()
     .openapi("CreateDomain");
@@ -38,9 +39,9 @@ export const SetPrimaryDomainSchema = z
 
 export const DomainSchema = z
     .object({
+        id: z.string().openapi({ example: "cmltvacp7003c07nw4ni4765c" }),
         host: z.string().openapi({ example: "app.example.com" }),
         https: z.boolean().openapi({ example: true }),
-        port: z.number().openapi({ example: 3000 }),
         path: z.string().openapi({ example: "/" }),
     })
     .passthrough()
@@ -49,6 +50,14 @@ export const DomainSchema = z
 export const DomainListSchema = z.array(DomainSchema).openapi("DomainList");
 
 // ── Port schemas ───────────────────────────────────────────────
+// Easypanel uses: { values: [...ports] } for create/update,
+//                 { index: number }      for delete
+
+const PortValueSchema = z.object({
+    published: z.number().openapi({ example: 8080, description: "Host port" }),
+    target: z.number().openapi({ example: 80, description: "Container port" }),
+    protocol: z.enum(["tcp", "udp"]).default("tcp").openapi({ example: "tcp" }),
+}).passthrough();
 
 export const CreatePortSchema = z
     .object({
@@ -60,18 +69,17 @@ export const CreatePortSchema = z
 
 export const UpdatePortSchema = z
     .object({
-        published: z.number(),
-        target: z.number(),
-        protocol: z.enum(["tcp", "udp"]).optional(),
+        index: z.number().openapi({ example: 0, description: "Index of the port to update (0-based)" }),
+        published: z.number().openapi({ example: 8080 }),
+        target: z.number().openapi({ example: 80 }),
+        protocol: z.enum(["tcp", "udp"]).default("tcp").openapi({ example: "tcp" }),
     })
     .passthrough()
     .openapi("UpdatePort");
 
 export const DeletePortSchema = z
     .object({
-        published: z.number(),
-        target: z.number(),
-        protocol: z.enum(["tcp", "udp"]).optional(),
+        index: z.number().openapi({ example: 0, description: "Index of the port to delete (0-based)" }),
     })
     .openapi("DeletePort");
 
@@ -87,9 +95,19 @@ export const PortSchema = z
 export const PortListSchema = z.array(PortSchema).openapi("PortList");
 
 // ── Mount schemas ──────────────────────────────────────────────
+// Easypanel uses: { values: [...mounts] } for create/update,
+//                 { index: number }       for delete
+
+const MountValueSchema = z.object({
+    type: z.string().default("volume").openapi({ example: "volume" }),
+    name: z.string().openapi({ example: "data" }),
+    mountPath: z.string().openapi({ example: "/app/data" }),
+    hostPath: z.string().optional().openapi({ example: "/mnt/data" }),
+}).passthrough();
 
 export const CreateMountSchema = z
     .object({
+        type: z.string().default("volume").openapi({ example: "volume", description: "Mount type: volume, bind, file" }),
         name: z.string().openapi({ example: "data" }),
         mountPath: z.string().openapi({ example: "/app/data" }),
         hostPath: z.string().optional().openapi({ example: "/mnt/data" }),
@@ -99,7 +117,9 @@ export const CreateMountSchema = z
 
 export const UpdateMountSchema = z
     .object({
-        name: z.string(),
+        index: z.number().openapi({ example: 0, description: "Index of the mount to update (0-based)" }),
+        type: z.string().optional().openapi({ example: "volume" }),
+        name: z.string().optional(),
         mountPath: z.string().optional(),
         hostPath: z.string().optional(),
     })
@@ -108,15 +128,15 @@ export const UpdateMountSchema = z
 
 export const DeleteMountSchema = z
     .object({
-        name: z.string(),
+        index: z.number().openapi({ example: 0, description: "Index of the mount to delete (0-based)" }),
     })
     .openapi("DeleteMount");
 
 export const MountSchema = z
     .object({
+        type: z.string().openapi({ example: "volume" }),
         name: z.string().openapi({ example: "data" }),
         mountPath: z.string().openapi({ example: "/app/data" }),
-        hostPath: z.string().optional().openapi({ example: "/mnt/data" }),
     })
     .passthrough()
     .openapi("Mount");
