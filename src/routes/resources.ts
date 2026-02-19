@@ -144,7 +144,7 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.setPrimaryDomain", { ...p, ...body });
+        await callTrpc("domains.setPrimaryDomain", { ...p, id: body.domainId });
         return c.json({ ok: true }, 200);
     }
 );
