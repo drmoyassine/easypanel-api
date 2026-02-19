@@ -122,7 +122,7 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.deleteDomain", { ...p, ...body });
+        await callTrpc("domains.deleteDomain", { ...p, id: body.domainId });
         return c.json({ ok: true }, 200);
     }
 );

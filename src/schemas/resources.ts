@@ -24,7 +24,7 @@ export const UpdateDomainSchema = z
 
 export const DeleteDomainSchema = z
     .object({
-        host: z.string().openapi({ example: "app.example.com" }),
+        domainId: z.string().openapi({ example: "cmltvacp7003c07nw4ni4765c" }),
     })
     .openapi("DeleteDomain");
 
