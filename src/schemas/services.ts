@@ -133,9 +133,11 @@ export const UpdateCredentialsSchema = z
 
 export const ExposeServiceSchema = z
     .object({
-        ports: z.array(z.number()).optional(),
+        exposedPort: z.number().openapi({
+            example: 5432,
+            description: "Host port to expose the database on (0 to un-expose)",
+        }),
     })
-    .passthrough()
     .openapi("ExposeService");
 
 // ────────────────────────────────────────────────────────────────

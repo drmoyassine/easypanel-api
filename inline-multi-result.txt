@@ -1,0 +1,4 @@
+create: 201
+source-inline: 200
+deploy: 200 {"ok":true}
+destroy: done

@@ -1,0 +1,3 @@
+source-git: 200
+deploy: 200 -> {"ok":true}
+destroy: done

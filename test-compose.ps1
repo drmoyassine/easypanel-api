@@ -34,15 +34,16 @@ Start-Sleep -Seconds 2
 # ── 2. INSPECT ────────────────────────────────────────────────────────
 Req "inspect" GET $svcUrl
 
-# ── 3. SOURCE: inline (composeFile field — high risk) ─────────────────
-$yaml = "version: '3.8'\nservices:\n  web:\n    image: nginx:alpine\n    ports:\n      - '80'"
-Req "source-inline" PUT "$svcUrl/source/inline" @{ composeFile = $yaml }
+# ── 3. SOURCE: inline (content field — confirmed via probe) ───────────
+$yaml = "version: '3.8'`nservices:`n  web:`n    image: nginx:alpine"
+Req "source-inline" PUT "$svcUrl/source/inline" @{ content = $yaml }
 
 # ── 4. SOURCE: git ────────────────────────────────────────────────────
 Req "source-git" PUT "$svcUrl/source/git" @{
-    repo = "https://github.com/docker/awesome-compose.git"
-    ref  = "master"
-    path = "/"
+    repo        = "https://github.com/docker/awesome-compose.git"
+    ref         = "master"
+    rootPath    = "/nginx-golang"
+    composeFile = "compose.yaml"
 }
 
 # ── 5. ENV ────────────────────────────────────────────────────────────

@@ -1,0 +1,52 @@
+[
+  {
+    "label": "A-cleanup",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "A-create",
+    "status": 201,
+    "body": "{\"projectName\":\"hello-world\",\"name\":\"test-git-deploy\",\"type\":\"compose\",\"enabled\":true,\"token\":\"24439d96b875c321271dcc98bb364253a3d2ae6d869d1037\",\"primaryDomainId\":null,\"env\":\"\",\"createDotEnv\":false}"
+  },
+  {
+    "label": "A-source-git",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "A-deploy",
+    "status": "ERR",
+    "body": "The request was canceled due to the configured HttpClient.Timeout of 60 seconds elapsing."
+  },
+  {
+    "label": "A-destroy",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "B-cleanup",
+    "status": 404,
+    "body": "404 page not found\n"
+  },
+  {
+    "label": "B-create",
+    "status": 201,
+    "body": "{\"projectName\":\"hello-world\",\"name\":\"test-inline-deploy\",\"type\":\"compose\",\"enabled\":true,\"token\":\"00386932817d25d9d188fe44684a78ab3288c9957b28e5b7\",\"primaryDomainId\":null,\"env\":\"\",\"createDotEnv\":false}"
+  },
+  {
+    "label": "B-source-inline",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "B-deploy",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "B-destroy",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  }
+]

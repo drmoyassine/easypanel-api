@@ -1,0 +1,92 @@
+[
+  {
+    "label": "pg-cleanup",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "pg-create",
+    "status": 201,
+    "body": "{\"type\":\"postgres\",\"projectName\":\"hello-world\",\"name\":\"test-pg-audit\",\"databaseName\":\"hello-world\",\"user\":\"postgres\",\"image\":\"postgres:17\",\"enabled\":true,\"exposedPort\":0,\"password\":\"TestPass123\",\"env\":null,\"command\":null}"
+  },
+  {
+    "label": "pg-inspect",
+    "status": 200,
+    "body": "{\"type\":\"postgres\",\"projectName\":\"hello-world\",\"name\":\"test-pg-audit\",\"databaseName\":\"hello-world\",\"user\":\"postgres\",\"image\":\"postgres:17\",\"enabled\":true,\"exposedPort\":0,\"password\":\"TestPass123\",\"env\":null,\"command\":null,\"pgWebDomain\":\"hello-world-test-pg-audit-pgweb.4ky7uo.easypanel.host\",\"dbGateDomain\":\"hello-world-test-pg-audit-dbgate.4ky7uo.easypanel.host\"}"
+  },
+  {
+    "label": "pg-credentials",
+    "status": 500,
+    "body": "{\"error\":\"tRPC call failed: services.postgres.updateCredentials\",\"procedure\":\"services.postgres.updateCredentials\",\"upstream\":{\"error\":{\"json\":{\"message\":\"Invariant failed\",\"code\":-32603,\"data\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"httpStatus\":500,\"path\":\"services.postgres.updateCredentials\",\"zodErrors\":null}}}}}"
+  },
+  {
+    "label": "pg-resources",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "pg-expose",
+    "status": 400,
+    "body": "{\"error\":\"tRPC call failed: services.postgres.exposeService\",\"procedure\":\"services.postgres.exposeService\",\"upstream\":{\"error\":{\"json\":{\"message\":\"[\\n  {\\n    \\\"code\\\": \\\"invalid_type\\\",\\n    \\\"expected\\\": \\\"number\\\",\\n    \\\"received\\\": \\\"undefined\\\",\\n    \\\"path\\\": [\\n      \\\"exposedPort\\\"\\n    ],\\n    \\\"message\\\": \\\"Required\\\"\\n  }\\n]\",\"code\":-32600,\"data\":{\"code\":\"BAD_REQUEST\",\"httpStatus\":400,\"path\":\"services.postgres.exposeService\",\"zodErrors\":{\"exposedPort\":\"Required\"}}}}}}"
+  },
+  {
+    "label": "pg-disable",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "pg-enable",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "pg-destroy",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "redis-cleanup",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "redis-create",
+    "status": 201,
+    "body": "{\"type\":\"redis\",\"projectName\":\"hello-world\",\"name\":\"test-redis-audit\",\"image\":\"redis:7\",\"enabled\":true,\"exposedPort\":0,\"password\":\"e8305d17777b94d241d1\",\"env\":null,\"command\":null}"
+  },
+  {
+    "label": "redis-inspect",
+    "status": 200,
+    "body": "{\"type\":\"redis\",\"projectName\":\"hello-world\",\"name\":\"test-redis-audit\",\"image\":\"redis:7\",\"enabled\":true,\"exposedPort\":0,\"password\":\"e8305d17777b94d241d1\",\"env\":null,\"command\":null,\"redisCommanderDomain\":\"hello-world-test-redis-audit-rediscommander.4ky7uo.easypanel.host\",\"dbGateDomain\":\"hello-world-test-redis-audit-dbgate.4ky7uo.easypanel.host\"}"
+  },
+  {
+    "label": "redis-disable",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "redis-destroy",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "mysql-cleanup",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  },
+  {
+    "label": "mysql-create",
+    "status": 201,
+    "body": "{\"type\":\"mysql\",\"projectName\":\"hello-world\",\"name\":\"test-mysql-audit\",\"databaseName\":\"hello-world\",\"user\":\"mysql\",\"image\":\"mysql:9\",\"enabled\":true,\"exposedPort\":0,\"password\":\"TestPass123\",\"rootPassword\":\"978d6a37d16a8069ea4b\",\"env\":null,\"command\":null}"
+  },
+  {
+    "label": "mysql-credentials",
+    "status": 500,
+    "body": "{\"error\":\"tRPC call failed: services.mysql.updateCredentials\",\"procedure\":\"services.mysql.updateCredentials\",\"upstream\":{\"error\":{\"json\":{\"message\":\"Invariant failed\",\"code\":-32603,\"data\":{\"code\":\"INTERNAL_SERVER_ERROR\",\"httpStatus\":500,\"path\":\"services.mysql.updateCredentials\",\"zodErrors\":null}}}}}"
+  },
+  {
+    "label": "mysql-destroy",
+    "status": 200,
+    "body": "{\"ok\":true}"
+  }
+]
