@@ -100,7 +100,27 @@ domains.openapi(
     async (c) => {
         const body = c.req.valid("json");
         const p = svc(c);
-        await callTrpc("domains.updateDomain", { ...p, ...body });
+        // Build full Easypanel payload matching the domain schema
+        const domainPayload = {
+            ...p,
+            id: body.domainId,
+            host: body.host,
+            https: body.https ?? true,
+            path: body.path ?? "/",
+            middlewares: [],
+            certificateResolver: "",
+            wildcard: false,
+            destinationType: "service",
+            serviceDestination: {
+                protocol: body.protocol ?? "http",
+                port: body.port ?? 80,
+                path: body.path ?? "/",
+                projectName: p.projectName,
+                serviceName: p.serviceName,
+                composeService: "",
+            },
+        };
+        await callTrpc("domains.updateDomain", domainPayload);
         return c.json({ ok: true }, 200);
     }
 );
