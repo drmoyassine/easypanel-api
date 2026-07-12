@@ -4,9 +4,10 @@
  * Easypanel exposes its internal API as tRPC procedures on port 3000.
  * We call them directly via HTTP — no SDK needed.
  *
- * tRPC convention:
- *   - Queries  → GET  with ?input=... (URL-encoded JSON)
- *   - Mutations → POST with JSON body
+ * Current EasyPanel deployments accept authenticated procedures as POST
+ * requests, including reads. Older deployments returned a nested tRPC
+ * envelope; current deployments return a top-level `json` envelope, so the
+ * response parser below supports both formats.
  *
  * The token is auto-managed by token-manager.ts. Route handlers
  * simply call `callTrpc("procedure", input)` or `callTrpcQuery("procedure", input)`.
@@ -42,8 +43,24 @@ export interface TrpcRawResult<T = unknown> {
     headers: Headers;
 }
 
+function extractTrpcData<T>(body: Record<string, unknown>): T {
+    // Current EasyPanel response: { json: ..., meta: ... }
+    if (Object.prototype.hasOwnProperty.call(body, "json")) {
+        return body.json as T;
+    }
+
+    // Legacy response: { result: { data: { json: ... } } }
+    const nested = (body.result as Record<string, unknown> | undefined)?.data;
+    if (nested && typeof nested === "object" && "json" in nested) {
+        return (nested as Record<string, unknown>).json as T;
+    }
+
+    return nested as T;
+}
+
 /**
- * Internal fetch wrapper — supports both GET (query) and POST (mutation).
+ * Internal fetch wrapper — supports POST for current EasyPanel and GET for
+ * explicitly requested legacy callers.
  */
 async function doTrpcFetch(
     procedure: string,
@@ -118,7 +135,7 @@ export async function callTrpcQuery<T = unknown>(
     procedure: string,
     input: unknown = {}
 ): Promise<T> {
-    return callInternal<T>(procedure, input, "GET");
+    return callInternal<T>(procedure, input, "POST");
 }
 
 /**
@@ -130,7 +147,7 @@ export async function callTrpcRaw<T = unknown>(
     token?: string
 ): Promise<TrpcRawResult<T>> {
     const { body, res } = await doTrpcFetch(procedure, input, token, "POST");
-    const data = (body as unknown as TrpcResult<T>).result.data.json;
+    const data = extractTrpcData<T>(body);
     return { data, headers: res.headers };
 }
 
@@ -145,13 +162,13 @@ async function callInternal<T>(
 
     try {
         const { body } = await doTrpcFetch(procedure, input, token, method);
-        return (body as unknown as TrpcResult<T>).result.data.json;
+        return extractTrpcData<T>(body);
     } catch (err) {
         if (err instanceof TrpcCallError && err.status === 401) {
             invalidateToken();
             const freshToken = await getEasypanelToken();
             const { body } = await doTrpcFetch(procedure, input, freshToken, method);
-            return (body as unknown as TrpcResult<T>).result.data.json;
+            return extractTrpcData<T>(body);
         }
         throw err;
     }

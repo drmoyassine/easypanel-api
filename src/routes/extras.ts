@@ -1,6 +1,6 @@
 /**
  * Templates and Monitor routes.
- * Real tRPC: templates.createFromSchema, monitor.getSystemStats, etc.
+ * Real tRPC: templates.createFromSchema and the current metrics.* procedures.
  */
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { callTrpc, callTrpcQuery } from "../lib/trpc-client.js";
@@ -47,7 +47,7 @@ templates.openapi(
 
 export const monitor = new OpenAPIHono();
 
-// GET /system — monitor.getSystemStats
+// GET /system — metrics.getSystemStats
 monitor.openapi(
     createRoute({
         method: "get",
@@ -60,12 +60,15 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpcQuery("monitor.getSystemStats", {});
+        const data = await callTrpcQuery("metrics.getSystemStats", {
+            range: 14400,
+            step: "300s",
+        });
         return c.json(data as any, 200);
     }
 );
 
-// GET /storage — monitor.getStorageStats
+// GET /storage — disk data from metrics.getSystemStats
 monitor.openapi(
     createRoute({
         method: "get",
@@ -78,12 +81,15 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpcQuery("monitor.getStorageStats", {});
+        const data = await callTrpcQuery("metrics.getSystemStats", {
+            range: 14400,
+            step: "300s",
+        });
         return c.json(data as any, 200);
     }
 );
 
-// GET /services — monitor.getMonitorTableData
+// GET /services — metrics.getAllServicesStats
 monitor.openapi(
     createRoute({
         method: "get",
@@ -96,7 +102,32 @@ monitor.openapi(
         },
     }),
     async (c) => {
-        const data = await callTrpcQuery("monitor.getMonitorTableData", {});
+        const data = await callTrpcQuery("metrics.getAllServicesStats", {});
+        return c.json(data as any, 200);
+    }
+);
+
+// GET /services/:projectName/:serviceName — metrics.getServiceStats
+monitor.openapi(
+    createRoute({
+        method: "get",
+        path: "/services/{projectName}/{serviceName}",
+        tags: ["Monitor"],
+        summary: "Get CPU, memory, and network history for one service",
+        security: [{ Bearer: [] }],
+        request: { params: ServiceParamsSchema },
+        responses: {
+            200: { content: { "application/json": { schema: ServiceStatsSchema } }, description: "Service stats" },
+        },
+    }),
+    async (c) => {
+        const { projectName, serviceName } = c.req.valid("param");
+        const data = await callTrpcQuery("metrics.getServiceStats", {
+            projectName,
+            serviceName,
+            range: 14400,
+            step: "300s",
+        });
         return c.json(data as any, 200);
     }
 );
