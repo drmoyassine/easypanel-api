@@ -28,6 +28,8 @@ import {
 import compose from "./routes/compose.js";
 import { domains, ports, mounts } from "./routes/resources.js";
 import { templates, monitor } from "./routes/extras.js";
+import { observability } from "./routes/observability.js";
+import { startObservabilitySampler } from "./lib/observability.js";
 
 // ── App setup ──────────────────────────────────────────────────
 
@@ -109,6 +111,7 @@ app.route("/api/v1/templates", templates);
 // ── Monitor ──────────────────────────────────────────────────
 
 app.route("/api/v1/monitor", monitor);
+app.route("/api/v1/observability", observability);
 
 // ── OpenAPI specification ────────────────────────────────────
 
@@ -165,6 +168,7 @@ async function start() {
     }
 
     serve({ fetch: app.fetch, port: PORT });
+    startObservabilitySampler();
 
     console.log(`[startup] ✓ Listening on http://localhost:${PORT}`);
     console.log(`[startup] ✓ Docs at http://localhost:${PORT}/docs`);

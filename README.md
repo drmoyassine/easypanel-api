@@ -79,6 +79,7 @@ curl http://localhost:3100/auth/status
 | Mounts | 4 | CRUD |
 | Templates | 1 | Deploy from template |
 | Monitor | 3 | System, storage, service stats |
+| Observability | 12 | Containers, processes, bounded logs, health, memory trends, alerts, PostgreSQL, Redis/BullMQ |
 
 Full interactive docs: **`http://localhost:3100/docs`**
 
@@ -91,6 +92,34 @@ Full interactive docs: **`http://localhost:3100/docs`**
 | `EASYPANEL_EMAIL` | — | **Yes** | Admin email for Easypanel login |
 | `EASYPANEL_PASSWORD` | — | **Yes** | Admin password for Easypanel login |
 | `API_SECRET` | — | No | Secret for external API auth (omit for dev mode) |
+| `OBSERVABILITY_ENABLED` | `true` | No | Enables the bounded background runtime sampler |
+| `DOCKER_API_URL` | — | Recommended | Private URL of a restricted Docker socket proxy |
+| `DOCKER_SOCKET_PATH` | `/var/run/docker.sock` | Fallback | Direct Docker socket path; grants powerful host access |
+| `OBSERVABILITY_SAMPLE_INTERVAL_SECONDS` | `60` | No | Sampling interval, bounded to 30–3600 seconds |
+| `OBSERVABILITY_MAX_POINTS` | `1440` | No | In-memory points retained per container |
+
+## Production observability
+
+The authenticated `/api/v1/observability/*` routes provide bounded, read-only diagnostics for
+containers, processes, health, redacted logs, working-set/file-cache trends, alerts, PostgreSQL,
+Redis, and explicitly named BullMQ queues. They never expose arbitrary shell execution, container
+restart, deletion, or unbounded log/key scans.
+Unlike the gateway's other development endpoints, observability refuses to start without
+`API_SECRET`; anonymous Docker diagnostics are never permitted.
+
+Prefer a restricted Docker socket proxy on the private application network and set
+`DOCKER_API_URL=http://docker-socket-proxy:2375`. Enable only the Docker API families required by
+these routes: `PING`, `INFO`, `CONTAINERS`, and `EXEC` (the last is needed only for PostgreSQL and
+Redis diagnostics). If database diagnostics are not required, keep `EXEC` disabled. Do not publish
+the proxy port publicly.
+
+Directly mounting `/var/run/docker.sock` is supported as a fallback, but even a read-only socket
+mount provides host-level Docker control to the bridge process. Keep `API_SECRET` configured,
+restrict network access to the bridge, and never expose the Docker socket or proxy publicly.
+
+Trend samples are intentionally kept in bounded process memory and reset when this bridge is
+redeployed. Durable monitoring history and alert delivery belong in a dedicated metrics system;
+this suite is for safe live inspection and short-window diagnosis.
 
 ## Tech Stack
 

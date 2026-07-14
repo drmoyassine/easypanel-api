@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import { timingSafeEqual } from "node:crypto";
 
 /**
  * Auth middleware — validates API_SECRET from the Authorization header.
@@ -26,7 +27,9 @@ export const authMiddleware = createMiddleware(async (c, next) => {
 
     const token = authHeader.slice(7).trim();
 
-    if (token !== apiSecret) {
+    const provided = Buffer.from(token);
+    const expected = Buffer.from(apiSecret);
+    if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
         return c.json({ error: "Invalid API secret" }, 401);
     }
 
